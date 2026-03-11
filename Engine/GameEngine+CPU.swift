@@ -27,7 +27,6 @@ extension GameEngine {
         let currentIndex = state.currentPlayerIndex
         let hand = state.players[currentIndex].hand
         let currentWord = state.currentWord
-        print("DEBUG CPU sees currentWord:", currentWord.map(\.letter).joined())
 
         if !currentWord.isEmpty {
             if await tryCPUInsert(currentIndex: currentIndex, hand: hand, currentWord: currentWord) {

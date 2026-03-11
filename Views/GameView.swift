@@ -32,26 +32,7 @@ struct GameView: View {
 
                     WordAreaView()
 
-                    if let state = engine.state {
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 4) {
-                                ForEach(Array(state.log.prefix(10).enumerated()), id: \.offset) { _, entry in
-                                    Text(entry)
-                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                                        .foregroundColor(.black)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                            }
-                            .padding(8)
-                        }
-                        .frame(maxHeight: 140)
-                        .background(Color.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
-                    }
-                    
+                
                     if state.consecutivePasses > 0 && state.phase == .playing {
                         CompactStatusView(
                             text: "Passes: \(state.consecutivePasses) of \(state.players.count)"

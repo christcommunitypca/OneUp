@@ -215,18 +215,11 @@ extension GameEngine {
         switch reason {
         case .edit:
             state.consecutivePasses = 0
-            state.log.insert(
-                "TURN edit by \(state.players[actorIndex].displayName) -> passes=0 word=\(state.wordString) lastEditor=\(String(describing: state.lastEditingPlayerIndex))",
-                at: 0
-            )
+
             advanceToNextPlayer(&state)
 
         case .discard:
             state.consecutivePasses += 1
-            state.log.insert(
-                "TURN discard by \(state.players[actorIndex].displayName) -> passes=\(state.consecutivePasses) word=\(state.wordString) lastEditor=\(String(describing: state.lastEditingPlayerIndex))",
-                at: 0
-            )
 
             if state.consecutivePasses >= state.players.count {
                 endRound(&state, lastPasserIndex: actorIndex)
@@ -236,10 +229,6 @@ extension GameEngine {
 
         case .pass:
             state.consecutivePasses += 1
-            state.log.insert(
-                "TURN pass by \(state.players[actorIndex].displayName) -> passes=\(state.consecutivePasses) word=\(state.wordString) lastEditor=\(String(describing: state.lastEditingPlayerIndex))",
-                at: 0
-            )
 
             if state.consecutivePasses >= state.players.count {
                 endRound(&state, lastPasserIndex: actorIndex)
@@ -497,9 +486,8 @@ extension GameEngine {
 
         state.players[actorIndex].hand = newHand
         state.currentWord = previewWord
-        state.log.insert("DEBUG after play: word=\(state.wordString) handCount=\(state.players[actorIndex].hand.count)", at: 0)
+
         state.lastEditingPlayerIndex = actorIndex
-        state.log.insert("\(state.players[actorIndex].displayName) played → \(newWordString)", at: 0)
         validationMessage = nil
         roundMessage = nil
 
@@ -529,7 +517,6 @@ extension GameEngine {
         LetterDeck.rebuildDrawPileIfNeeded(drawPile: &state.drawPile, discardPile: &state.discardPile)
 
         state.players[actorIndex].hand = actorHand
-        state.log.insert("\(state.players[actorIndex].displayName) discarded \(discardIndices.count) card(s)", at: 0)
         validationMessage = nil
         roundMessage = nil
 
@@ -549,7 +536,6 @@ extension GameEngine {
         roundMessage = nil
         clearPendingTurn()
 
-        state.log.insert("\(state.players[actorIndex].displayName) passed", at: 0)
 
         finishTurn(&state, actorIndex: actorIndex, reason: .pass)
         publishAndSchedule(state)
@@ -560,7 +546,6 @@ extension GameEngine {
 
         guard !state.players.isEmpty else { return }
         
-        state.log.insert("END ROUND -> lastPasser=\(lastPasserIndex) passes=\(state.consecutivePasses) word=\(state.wordString) lastEditor=\(String(describing: state.lastEditingPlayerIndex))", at: 0)
 
         if state.currentWord.isEmpty {
             let nextStarter = (lastPasserIndex + 1) % state.players.count
@@ -593,7 +578,6 @@ extension GameEngine {
         let scorerName = state.players[scorerIndex].displayName
 
         state.players[scorerIndex].score += points
-        state.log.insert("\(scorerName) scored \(points) for \"\(finalWord)\"", at: 0)
 
         if state.players[scorerIndex].score >= Config.winScore {
             state.phase = .gameOver

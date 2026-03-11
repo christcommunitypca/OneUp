@@ -64,7 +64,6 @@ extension GameEngine {
 
         state.players[pending.timedOutPlayerIndex].hand = timedOutHand
         state.players[pending.eligiblePlayerIndex].hand = eligibleHand
-        state.log.insert("\(state.players[pending.eligiblePlayerIndex].displayName) made a blind swap after timeout", at: 0)
         state.pendingBlindSwap = nil
 
         self.state = state
@@ -80,7 +79,6 @@ extension GameEngine {
         guard state.phase == .playing else { return }
 
         let timedOutIndex = state.currentPlayerIndex
-        state.log.insert("\(state.currentPlayer.displayName) ran out of time", at: 0)
 
         let nextIndex = state.nextPlayerIndex
 
