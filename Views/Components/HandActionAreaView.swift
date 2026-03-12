@@ -1,10 +1,3 @@
-//
-//  HandActionAreaView.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/11/26.
-//
-
 import SwiftUI
 
 struct HandActionAreaView: View {
@@ -22,67 +15,57 @@ struct HandActionAreaView: View {
     let onPass: () -> Void
     let onClear: () -> Void
 
+    private let actionAreaHeight: CGFloat = 91
+
     var body: some View {
         Group {
             if isMyTurn {
-                VStack(spacing: 8) {
-                    HStack(spacing: 8) {
-                        WordBuilderPrimaryButton(
-                            title: isValidating ? "Checking..." : playButtonTitle,
-                            color: Color(hex: "6E4DD8"),
+                VStack(spacing: 7) {
+                    HStack(spacing: 7) {
+                        HandPrimaryButton(
+                            title: isValidating ? "Checking…" : playButtonTitle,
                             disabled: !canChoosePlay || isValidating,
                             action: onPlay
                         )
-
-                        WordBuilderSecondaryButton(
-                            title: "Discard",
-                            disabled: !canChooseDiscard,
-                            action: onDiscard
-                        )
+                        HandSecondaryButton(title: "Discard", disabled: !canChooseDiscard, action: onDiscard)
                     }
-
-                    HStack(spacing: 8) {
-                        WordBuilderSecondaryButton(
-                            title: "Pass",
-                            action: onPass
-                        )
-
-                        WordBuilderSecondaryButton(
-                            title: "Clear",
-                            action: onClear
-                        )
+                    HStack(spacing: 7) {
+                        HandSecondaryButton(title: "Pass", action: onPass)
+                        HandSecondaryButton(title: "Clear", action: onClear)
                     }
                 }
+                .frame(height: actionAreaHeight)
             } else {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(hex: "F9FAFB"))
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Theme.bgSurface)
                     .overlay(
-                        Text("Waiting on Opponent")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(hex: "6B7280"))
+                        Text("Waiting for opponent")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(Theme.gray)
                     )
+                    .frame(height: actionAreaHeight)
             }
         }
-        .frame(minHeight: 96)
+        .frame(maxWidth: .infinity)
+        .frame(height: actionAreaHeight)
     }
 }
 
-private struct WordBuilderPrimaryButton: View {
+private struct HandPrimaryButton: View {
     let title: String
-    let color: Color
     let disabled: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(.white)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(disabled ? Theme.gray : .white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 44)
+                .frame(height: 42)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(disabled ? Color(hex: "D1D5DB") : color)
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(disabled ? Theme.lightGray : Theme.navy)
                 )
         }
         .buttonStyle(.plain)
@@ -90,7 +73,7 @@ private struct WordBuilderPrimaryButton: View {
     }
 }
 
-private struct WordBuilderSecondaryButton: View {
+private struct HandSecondaryButton: View {
     let title: String
     let disabled: Bool
     let action: () -> Void
@@ -104,17 +87,14 @@ private struct WordBuilderSecondaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(disabled ? Color(hex: "9CA3AF") : Color(hex: "111827"))
+                .font(.system(size: 14, weight: .regular))
+                .foregroundColor(disabled ? Theme.gray : Theme.textSecondary)
                 .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.white)
-                )
+                .frame(height: 42)
+                .background(Color.white)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(Color(hex: "D1D5DB"), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .stroke(Theme.borderBold, lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)

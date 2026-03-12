@@ -14,66 +14,36 @@ struct SetupView: View {
     @State private var showRules = false
 
     private let maxPlayers = 10
-    private let botNames = ["Kate", "Claire", "Henry", "Jack", "Sims", "Miles", "Lukes", "Charlotte", "Peggy"]
+    private let botNames = ["Kate", "Claire", "Henry", "Jack", "Sims", "Miles", "Luke", "Charlotte", "Peggy"]
 
     var body: some View {
         ZStack {
-            Color(hex: "F4FAFF").ignoresSafeArea()
-
+            Theme.bgPage.ignoresSafeArea()
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 14) {
-                    VStack(spacing: 6) {
+                    VStack(spacing: 4) {
                         Text("One Up")
-                            .font(.system(size: 32, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color(hex: "2563EB"))
-                            .frame(maxWidth: .infinity)
-
-                        Text("Add a letter. Steal the lead!")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(hex: "60A5FA"))
-                            .frame(maxWidth: .infinity)
+                            .font(.system(size: 30, weight: .bold, design: .serif)).italic()
+                            .foregroundColor(Theme.navy).frame(maxWidth: .infinity)
+                        Text("Add a letter. Steal the lead.")
+                            .font(.system(size: 12, weight: .regular)).foregroundColor(Theme.gray).frame(maxWidth: .infinity)
                     }
-                    .padding(.top, 8)
+                    .padding(.top, 10)
 
                     settingsCard
                     lineupCard
-
-                    Color.clear
-                        .frame(height: 92)
+                    Color.clear.frame(height: 88)
                 }
-                .padding(.horizontal, 12)
-                .padding(.top, 10)
-                .padding(.bottom, 16)
+                .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 16)
             }
         }
         .navigationBarHidden(true)
-        .safeAreaInset(edge: .bottom) {
-            bottomStartBar
-        }
-        .sheet(isPresented: $showRules) {
-            rulesSheet
-        }
+        .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar }
+        .sheet(isPresented: $showRules) { rulesSheet }
     }
-
-    private var totalPlayerCount: Int {
-        1 + cpuCount
-    }
-
-    private var maxAllowedCPUCount: Int {
-        max(1, maxPlayers - 1)
-    }
-
-    private var primaryPlayerName: String {
-        "Me"
-    }
-
-    private var bottomStartBar: some View {
-        ZStack {
-            Rectangle()
-                .fill(Color.white.opacity(0.96))
-                .ignoresSafeArea(edges: .bottom)
-                .frame(height: 82)
-
+    private var bottomBar: some View {
+        VStack(spacing: 0) {
+            Divider()
             Button(action: startLocalGame) {
                 HStack(spacing: 8) {
                     Image(systemName: "play.fill")
@@ -85,337 +55,208 @@ struct SetupView: View {
                 .frame(height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color(hex: "2563EB"))
+                        //.fill(Color(hex: "2563EB"))
+                        .fill(Color(Theme.navy))
                 )
-                .shadow(color: Color(hex: "93C5FD").opacity(0.45), radius: 10, y: 4)
+             //   .shadow(color: Color(hex: //"93C5FD").opacity(0.45), radius: 10, y: 4)
+                .shadow(color: Theme.navy.opacity(0.20), radius: 10, y: 4)
             }
             .buttonStyle(.plain)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
         }
     }
+
+//    private var bottomBar: some View {
+//        ZStack {
+//            Rectangle().fill(Color(hex: "F5F1EB").opacity(0.97)).ignoresSafeArea(edges: .bottom).frame(height: 80)
+//            Rectangle().fill(Theme.border).frame(height: 1).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+//            Button(action: startLocalGame) {
+//                HStack(spacing: 6) {
+//                    Image(systemName: "play.fill").font(.system(size: 13, weight: .bold))
+//                    Text("Start Game").font(.system(size: 16, weight: .semibold))
+//                }
+//                .foregroundColor(.white).frame(maxWidth: 300).frame(height: 48)
+//                .background(RoundedRectangle(cornerRadius: 8).fill(Theme.navy))
+//                .shadow(color: Theme.navy.opacity(0.20), radius: 6, y: 3)
+//            }.buttonStyle(.plain)
+//        }
+//    }
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Settings")
-                    .font(.system(size: 18, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "1E3A8A"))
-
+                Text("Settings").font(.system(size: 16, weight: .bold, design: .serif)).italic().foregroundColor(Theme.navy)
                 Spacer()
-
-                Button {
-                    showRules = true
-                } label: {
-                    Image(systemName: "book.closed")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Color(hex: "2563EB"))
-                        .frame(width: 36, height: 36)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color(hex: "EFF6FF"))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Color(hex: "BFDBFE"), lineWidth: 1)
-                        )
-                }
-                .buttonStyle(.plain)
+                Button { showRules = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "book").font(.system(size: 12))
+                        Text("Rules").font(.system(size: 12, weight: .medium))
+                    }
+                    .foregroundColor(Theme.navy)
+                    .padding(.horizontal, 10).frame(height: 28)
+                    .background(Color.white)
+                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(Theme.border, lineWidth: 1))
+                }.buttonStyle(.plain)
             }
 
             pickerRow(title: "Mode", selectionText: mode.rawValue) {
-                Picker("Mode", selection: $mode) {
-                    ForEach(GameMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
-                }
+                Picker("Mode", selection: $mode) { ForEach(GameMode.allCases) { Text($0.rawValue).tag($0) } }
             }
-
+            SetupDividerView()
             pickerRow(title: "Turn Timer", selectionText: timer.displayName) {
-                Picker("Turn Timer", selection: $timer) {
-                    ForEach(TurnTimerOption.allCases) { option in
-                        Text(option.displayName).tag(option)
-                    }
-                }
+                Picker("Timer", selection: $timer) { ForEach(TurnTimerOption.allCases) { Text($0.displayName).tag($0) } }
             }
-
             if timer != .off {
-                toggleRow(title: "Use Card Swap Penalty", isOn: $allowBlindSwapAfterTimeout)
+                SetupDividerView()
+                toggleRow(title: "Blind Swap Penalty", isOn: $allowBlindSwapAfterTimeout)
             }
-
-            stepperRow(title: "Cards in Hand", valueText: "\(handSize)") {
-                handSize = max(3, handSize - 1)
-            } onPlus: {
-                handSize = min(12, handSize + 1)
-            }
-
-            stepperRow(title: "Winning Score", valueText: "\(winScore)") {
-                winScore = max(5, winScore - 5)
-            } onPlus: {
-                winScore = min(100, winScore + 5)
-            }
+            SetupDividerView()
+            stepperRow(title: "Cards in Hand", value: handSize) { handSize = max(3, handSize - 1) } onPlus: { handSize = min(12, handSize + 1) }
+            SetupDividerView()
+            stepperRow(title: "Winning Score", value: winScore) { winScore = max(5, winScore - 5) } onPlus: { winScore = min(100, winScore + 5) }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color(hex: "D6EAFE"), lineWidth: 1)
-        )
+        .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+        .shadow(color: Theme.cardShadow, radius: 3, y: 1)
     }
 
     private var lineupCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Lineup")
-                    .font(.system(size: 18, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "1E3A8A"))
-
+                Text("Lineup").font(.system(size: 16, weight: .bold, design: .serif)).italic().foregroundColor(Theme.navy)
                 Spacer()
-
                 Button {
-                    guard totalPlayerCount < maxPlayers else { return }
-                    cpuCount = min(maxAllowedCPUCount, cpuCount + 1)
+                    guard (1 + cpuCount) < maxPlayers else { return }
+                    cpuCount = min(maxPlayers - 1, cpuCount + 1)
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus")
-                        Text("Add Player")
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus").font(.system(size: 11, weight: .bold))
+                        Text("CPU").font(.system(size: 12, weight: .medium))
                     }
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .frame(height: 34)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(totalPlayerCount < maxPlayers ? Color(hex: "0EA5E9") : Color(hex: "D1D5DB"))
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(totalPlayerCount >= maxPlayers)
+                    .foregroundColor((1 + cpuCount) < maxPlayers ? Theme.navy : Theme.gray)
+                    .padding(.horizontal, 10).frame(height: 28)
+                    .background(Color.white)
+                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(Theme.border, lineWidth: 1))
+                }.buttonStyle(.plain).disabled((1 + cpuCount) >= maxPlayers)
             }
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                lineupChip(
-                    title: primaryPlayerName,
-                    systemName: "person.fill",
-                    tint: Color(hex: "2563EB"),
-                    removable: false
-                ) { }
-
-                ForEach(Array((0..<cpuCount).enumerated()), id: \.offset) { entry in
-                    lineupChip(
-                        title: botNames[entry.offset % botNames.count],
-                        systemName: "cpu",
-                        tint: Color(hex: "0EA5E9"),
-                        removable: cpuCount > 1
-                    ) {
-                        removeCPU(at: entry.offset)
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                lineupChip(title: "Me", systemName: "person", tint: Theme.navy, removable: false) { }
+                ForEach(Array((0..<cpuCount).enumerated()), id: \.offset) { e in
+                    lineupChip(title: botNames[e.offset % botNames.count], systemName: "cpu", tint: Theme.slate, removable: cpuCount > 1) {
+                        if cpuCount > 1 { cpuCount -= 1 }
                     }
                 }
             }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color(hex: "D6EAFE"), lineWidth: 1)
-        )
+        .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+        .shadow(color: Theme.cardShadow, radius: 3, y: 1)
     }
 
     private func pickerRow<Content: View>(title: String, selectionText: String, @ViewBuilder content: () -> Content) -> some View {
         HStack(spacing: 12) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: "334155"))
-
+            Text(title).font(.system(size: 13, weight: .medium)).foregroundColor(Theme.textSecondary)
             Spacer()
-
-            Menu {
-                content()
-            } label: {
-                HStack(spacing: 8) {
-                    Text(selectionText)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 10, weight: .bold))
+            Menu { content() } label: {
+                HStack(spacing: 5) {
+                    Text(selectionText).font(.system(size: 13, weight: .medium)).foregroundColor(Theme.navy)
+                    Image(systemName: "chevron.up.chevron.down").font(.system(size: 9, weight: .medium)).foregroundColor(Theme.navy)
                 }
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: "2563EB"))
-                .padding(.horizontal, 12)
-                .frame(height: 34)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(Color(hex: "EFF6FF"))
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .stroke(Color(hex: "BFDBFE"), lineWidth: 1)
-                )
+                .padding(.horizontal, 10).frame(height: 28)
+                .background(Color.white)
+                .overlay(RoundedRectangle(cornerRadius: 5).stroke(Theme.border, lineWidth: 1))
             }
         }
     }
 
     private func toggleRow(title: String, isOn: Binding<Bool>) -> some View {
         HStack(spacing: 12) {
-            Text(title)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(Color(hex: "475569"))
-
+            Text(title).font(.system(size: 13, weight: .medium)).foregroundColor(Theme.textSecondary)
             Spacer()
-
-            Toggle("", isOn: isOn)
-                .labelsHidden()
-                .tint(Color(hex: "0EA5E9"))
+            Toggle("", isOn: isOn).labelsHidden().tint(Theme.navy)
         }
     }
 
-    private func stepperRow(title: String, valueText: String, onMinus: @escaping () -> Void, onPlus: @escaping () -> Void) -> some View {
+    private func stepperRow(title: String, value: Int, onMinus: @escaping () -> Void, onPlus: @escaping () -> Void) -> some View {
         HStack(spacing: 12) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: "334155"))
-
+            Text(title).font(.system(size: 13, weight: .medium)).foregroundColor(Theme.textSecondary)
             Spacer()
-
             HStack(spacing: 10) {
-                adjustButton(systemName: "minus", action: onMinus)
-
-                Text(valueText)
-                    .font(.system(size: 18, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "2563EB"))
-                    .frame(minWidth: 34)
-
-                adjustButton(systemName: "plus", action: onPlus)
+                Button(action: onMinus) {
+                    Image(systemName: "minus").font(.system(size: 11, weight: .bold)).foregroundColor(Theme.navy)
+                        .frame(width: 28, height: 28).background(Circle().fill(Theme.navyLight))
+                        .overlay(Circle().stroke(Theme.navy.opacity(0.18), lineWidth: 1))
+                }.buttonStyle(.plain)
+                Text("\(value)").font(.system(size: 16, weight: .bold, design: .serif)).foregroundColor(Theme.navy).frame(minWidth: 28)
+                Button(action: onPlus) {
+                    Image(systemName: "plus").font(.system(size: 11, weight: .bold)).foregroundColor(Theme.navy)
+                        .frame(width: 28, height: 28).background(Circle().fill(Theme.navyLight))
+                        .overlay(Circle().stroke(Theme.navy.opacity(0.18), lineWidth: 1))
+                }.buttonStyle(.plain)
             }
         }
-    }
-
-    private func adjustButton(systemName: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 14, weight: .black))
-                .foregroundColor(Color(hex: "2563EB"))
-                .frame(width: 32, height: 32)
-                .background(
-                    Circle()
-                        .fill(Color(hex: "EFF6FF"))
-                )
-                .overlay(
-                    Circle()
-                        .stroke(Color(hex: "BFDBFE"), lineWidth: 1)
-                )
-        }
-        .buttonStyle(.plain)
     }
 
     private func lineupChip(title: String, systemName: String, tint: Color, removable: Bool, onRemove: @escaping () -> Void) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: systemName)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(tint)
-
-            Text(title)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: "1F2937"))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-
-            Spacer(minLength: 4)
-
+            Image(systemName: systemName).font(.system(size: 12, weight: .regular)).foregroundColor(tint)
+            Text(title).font(.system(size: 13, weight: .medium)).foregroundColor(Theme.text).lineLimit(1).minimumScaleFactor(0.8)
+            Spacer(minLength: 2)
             if removable {
                 Button(action: onRemove) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color(hex: "60A5FA"))
-                }
-                .buttonStyle(.plain)
+                    Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundColor(Theme.gray)
+                }.buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 12)
-        .frame(height: 44)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(hex: "F8FBFF"))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color(hex: "D6EAFE"), lineWidth: 1)
-        )
+        .padding(.horizontal, 10).frame(height: 38)
+        .background(RoundedRectangle(cornerRadius: 6).fill(Theme.bgSurface))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.border, lineWidth: 1))
     }
 
     private var rulesSheet: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("How to Play")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                        .foregroundColor(Color(hex: "2563EB"))
-
-                    ruleLine("1. Select Letters from Hand to spell word")
-                    ruleLine("2. Add or Swap Letters each turn")
-                    ruleLine("3. Word cannot be used twice per round")
-                    ruleLine("4. Discard to draw new letters")
-                    ruleLine("5. Pass when cannot play a letter")
-
-                    Text("Scoring")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                        .foregroundColor(Color(hex: "2563EB"))
-                        .padding(.top, 6)
-
-                    ruleLine("Letters 1-4 are one point each")
-                    ruleLine("Letters 5+ are two points each")
-                    ruleLine("Points awarded to last player to add letters when each player passes")
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("How to Play").font(.system(size: 17, weight: .bold, design: .serif)).italic().foregroundColor(Theme.navy)
+                    ruleLine("Select letters from your hand to spell or extend a word.")
+                    ruleLine("Add or swap letters each turn.")
+                    ruleLine("Discard to draw new letters.")
+                    ruleLine("Pass when you cannot play.")
+                    Text("Scoring").font(.system(size: 17, weight: .bold, design: .serif)).italic().foregroundColor(Theme.navy).padding(.top, 6)
+                    ruleLine("Letters 1–4: one point each.")
+                    ruleLine("Letters 5 and beyond: two points each.")
+                    ruleLine("Points go to the last player to add letters when all others pass.")
+                    ruleLine("First to \(winScore) points wins.")
                 }
                 .padding(20)
             }
-            .background(Color(hex: "F4FAFF").ignoresSafeArea())
-            .navigationTitle("Rules")
-            .navigationBarTitleDisplayMode(.inline)
+            .background(Theme.bgPage.ignoresSafeArea())
+            .navigationTitle("Rules").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        showRules = false
-                    }
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(hex: "2563EB"))
+                    Button("Done") { showRules = false }.font(.system(size: 14, weight: .medium)).foregroundColor(Theme.navy)
                 }
             }
         }
     }
 
     private func ruleLine(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 15, weight: .semibold, design: .rounded))
-            .foregroundColor(Color(hex: "1F2937"))
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func removeCPU(at index: Int) {
-        guard cpuCount > 1 else { return }
-        guard index >= 0, index < cpuCount else { return }
-        cpuCount -= 1
+        HStack(alignment: .top, spacing: 8) {
+            Text("–").foregroundColor(Theme.navy).font(.system(size: 13))
+            Text(text).font(.system(size: 14, weight: .regular)).foregroundColor(Theme.textSecondary)
+            Spacer()
+        }
     }
 
     private func startLocalGame() {
-        let config = GameConfig(
-            mode: mode,
-            timer: timer,
-            allowBlindSwapAfterTimeout: allowBlindSwapAfterTimeout,
-            handSize: handSize,
-            winScore: winScore
-        )
-
-        engine.newLocalGame(
-            playerNames: [primaryPlayerName],
-            cpuCount: cpuCount,
-            config: config,
-            humanClerkId: authManager.userId
-        )
-
+        let config = GameConfig(mode: mode, timer: timer, allowBlindSwapAfterTimeout: allowBlindSwapAfterTimeout, handSize: handSize, winScore: winScore)
+        engine.newLocalGame(playerNames: ["Me"], cpuCount: cpuCount, config: config, humanClerkId: authManager.userId)
         dismiss()
     }
 }

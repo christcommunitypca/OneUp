@@ -2,9 +2,8 @@ import SwiftUI
 
 struct HandView: View {
     @EnvironmentObject var engine: GameEngine
-
     private let tileHeight: CGFloat = 54
-    private let tileSpacing: CGFloat = 6
+    private let tileSpacing: CGFloat = 5
 
     var body: some View {
         let hand = engine.visibleHand
@@ -12,12 +11,11 @@ struct HandView: View {
 
         VStack(spacing: 0) {
             Rectangle()
-                .fill(myTurn ? Color(hex: "6E4DD8") : Color(hex: "D1D5DB"))
+                .fill(myTurn ? Theme.navy : Theme.border)
                 .frame(height: 2)
 
             VStack(spacing: 10) {
                 HandHeaderView(remainingSeconds: engine.remainingSeconds())
-
                 HandTilesRowView(
                     hand: hand,
                     handSize: engine.state?.config.handSize ?? 7,
@@ -25,14 +23,11 @@ struct HandView: View {
                     tileSpacing: tileSpacing,
                     isMyTurn: myTurn,
                     pendingTurn: engine.pendingTurn,
-                    isDrafted: { index in isDrafted(index) },
-                    draftOrder: { index in draftOrder(index) },
-                    tileOpacity: { index in tileOpacity(index: index, isMyTurn: myTurn) },
-                    onTapTile: { index in
-                        engine.toggleHandSelection(at: index)
-                    }
+                    isDrafted: { isDrafted($0) },
+                    draftOrder: { draftOrder($0) },
+                    tileOpacity: { tileOpacity(index: $0, isMyTurn: myTurn) },
+                    onTapTile: { engine.toggleHandSelection(at: $0) }
                 )
-
                 HandActionAreaView(
                     isMyTurn: myTurn,
                     isValidating: engine.isValidating,
@@ -42,21 +37,11 @@ struct HandView: View {
                     canChooseSwap: false,
                     canChooseDiscard: engine.canDiscardSelection,
                     swapIsActive: false,
-                    onPlay: {
-                        Task { await engine.playSelectedAction() }
-                    },
-                    onSwap: {
-                        engine.chooseSwapMode()
-                    },
-                    onDiscard: {
-                        engine.discardSelectedLetters()
-                    },
-                    onPass: {
-                        engine.pass()
-                    },
-                    onClear: {
-                        engine.clearPendingTurn()
-                    }
+                    onPlay: { Task { await engine.playSelectedAction() } },
+                    onSwap: { engine.chooseSwapMode() },
+                    onDiscard: { engine.discardSelectedLetters() },
+                    onPass: { engine.pass() },
+                    onClear: { engine.clearPendingTurn() }
                 )
             }
             .padding(.horizontal, 12)
@@ -66,10 +51,10 @@ struct HandView: View {
         }
         .background(Color.white)
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(Color(hex: "E5E7EB"), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Theme.border, lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func isDrafted(_ handIndex: Int) -> Bool {
@@ -79,23 +64,12 @@ struct HandView: View {
     }
 
     private func draftOrder(_ handIndex: Int) -> Int? {
-        if let insert = engine.pendingTurn.insertDrafts.first(where: { $0.handIndex == handIndex }) {
-            return insert.order
-        }
-        if let swap = engine.pendingTurn.swapDrafts.first(where: { $0.handIndex == handIndex }) {
-            return swap.order
-        }
-
+        if let insert = engine.pendingTurn.insertDrafts.first(where: { $0.handIndex == handIndex }) { return insert.order }
+        if let swap = engine.pendingTurn.swapDrafts.first(where: { $0.handIndex == handIndex }) { return swap.order }
         let selected = Array(engine.pendingTurn.selectedHandIndices).sorted()
-        if let idx = selected.firstIndex(of: handIndex) {
-            return idx + 1
-        }
-
+        if let idx = selected.firstIndex(of: handIndex) { return idx + 1 }
         return nil
     }
 
-    private func tileOpacity(index: Int, isMyTurn: Bool) -> Double {
-        guard isMyTurn else { return 0.92 }
-        return 1.0
-    }
+    private func tileOpacity(index: Int, isMyTurn: Bool) -> Double { isMyTurn ? 1.0 : 0.90 }
 }

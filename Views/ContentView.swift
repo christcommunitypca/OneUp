@@ -13,10 +13,9 @@ struct ContentView: View {
                 authenticatedRoot
                     .task(id: clerk.user?.id) {
                         await authManager.setAuthenticatedUser(id: clerk.user?.id)
-
-                        if let currentName = clerk.user?.firstName,
+                        if let name = clerk.user?.firstName,
                            authManager.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            await authManager.savePlayerName(currentName)
+                            await authManager.savePlayerName(name)
                         }
                     }
             } else {
@@ -26,65 +25,46 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.2), value: clerk.user != nil)
     }
 
-    // MARK: - Authenticated
-
     @ViewBuilder
     private var authenticatedRoot: some View {
         if engine.state == nil {
-            NavigationStack {
-                SetupView()
-            }
+            NavigationStack { SetupView() }
         } else {
-            NavigationStack {
-                GameView()
-            }
+            NavigationStack { GameView() }
         }
     }
-
-    // MARK: - Unauthenticated
 
     @ViewBuilder
     private var unauthenticatedRoot: some View {
         ZStack {
-            Theme.background.ignoresSafeArea()
-
-            VStack(spacing: 24) {
+            Theme.bgPage.ignoresSafeArea()
+            VStack(spacing: 32) {
                 Spacer()
 
-                VStack(spacing: 8) {
-                    Text("Word Builder")
-                        .font(.system(size: 34, weight: .black, design: .serif))
-                        .italic()
-                        .foregroundColor(Theme.violet)
-
-                    Text("A cleaner word game for grown-up game night.")
-                        .font(.system(size: 14, weight: .semibold))
+                VStack(spacing: 6) {
+                    Text("One Up")
+                        .font(.system(size: 36, weight: .bold, design: .serif)).italic()
+                        .foregroundColor(Theme.navy)
+                    Text("A word game for people who know words.")
+                        .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Theme.gray)
                         .multilineTextAlignment(.center)
                 }
 
                 VStack(spacing: 14) {
-                    ClerkKitUI.AuthView()
-                        .frame(maxWidth: 420)
+                    ClerkKitUI.AuthView().frame(maxWidth: 400)
                 }
-                .padding(18)
-                .background(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(Theme.white.opacity(0.94))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(Theme.violet.opacity(0.10), lineWidth: 1)
-                )
-                .shadow(color: Theme.violet.opacity(0.08), radius: 18, y: 6)
-                .padding(.horizontal, 20)
+                .padding(20)
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
+                .shadow(color: Theme.cardShadow, radius: 8, y: 3)
+                .padding(.horizontal, 24)
 
                 Spacer()
 
                 Text("Sign in to save your name and play online.")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Theme.gray)
-                    .padding(.bottom, 18)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Theme.gray).padding(.bottom, 20)
             }
         }
     }

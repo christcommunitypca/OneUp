@@ -1,10 +1,3 @@
-//
-//  HandTilesRowView.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/11/26.
-//
-
 import SwiftUI
 
 struct HandTilesRowView: View {
@@ -24,7 +17,7 @@ struct HandTilesRowView: View {
             let availableWidth = max(0, proxy.size.width)
             let slotCount = max(handSize, hand.count)
             let computedWidth = slotCount > 0
-                ? min(44, max(34, (availableWidth - (CGFloat(slotCount - 1) * tileSpacing)) / CGFloat(slotCount)))
+                ? min(44, max(32, (availableWidth - CGFloat(slotCount - 1) * tileSpacing) / CGFloat(slotCount)))
                 : 44
 
             HStack(spacing: tileSpacing) {
@@ -38,17 +31,14 @@ struct HandTilesRowView: View {
                         isDiscardSelected: isMyTurn && pendingTurn.action == .discard && pendingTurn.discardSelection.contains(index),
                         showVowelHint: false,
                         isEnabled: true
-                    ) {
-                        onTapTile(index)
-                    }
+                    ) { onTapTile(index) }
                     .frame(width: computedWidth, height: tileHeight)
                     .allowsHitTesting(isMyTurn)
                     .opacity(tileOpacity(index))
                 }
-
                 ForEach(0..<max(0, handSize - hand.count), id: \.self) { _ in
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .stroke(Color(hex: "D1D5DB"), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .stroke(Theme.border, style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
                         .frame(width: computedWidth, height: tileHeight)
                 }
             }

@@ -1,10 +1,3 @@
-//
-//  GameHeaderView.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/11/26.
-//
-
 import SwiftUI
 
 struct GameHeaderView: View {
@@ -16,44 +9,52 @@ struct GameHeaderView: View {
     let onSettings: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
-            Text("One Up")
-                .font(.system(size: 30, weight: .heavy, design: .rounded))
-                .foregroundColor(Color(hex: "2563EB"))
-                .frame(maxWidth: .infinity)
-
-            Text("Add a letter. Steal the lead!")
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: "60A5FA"))
-                .frame(maxWidth: .infinity)
-
-            HStack(spacing: 14) {
-                GameHeaderIconButton(systemName: "house", action: onNewGame)
-                GameHeaderIconButton(systemName: "questionmark.circle", action: onHelp)
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("One Up")
+                    .font(.system(size: 22, weight: .bold, design: .serif))
+                    .italic()
+                    .foregroundColor(Theme.navy)
+                Text("Add a letter. Steal the lead.")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Theme.gray)
+                    .kerning(0.2)
             }
-            .frame(maxWidth: .infinity)
+
+            Spacer()
+
+            HStack(spacing: 8) {
+                GameHeaderIconButton(systemName: "arrow.uturn.left", label: "New", action: onNewGame)
+                GameHeaderIconButton(systemName: "questionmark", label: "Help", action: onHelp)
+            }
         }
     }
 }
 
 private struct GameHeaderIconButton: View {
     let systemName: String
+    let label: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(Color(hex: "1E3A8A"))
-                .frame(width: 40, height: 40)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.white)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(Color(hex: "D6EAFE"), lineWidth: 1)
-                )
+            VStack(spacing: 2) {
+                Image(systemName: systemName)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Theme.navy)
+                Text(label)
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(Theme.gray)
+            }
+            .frame(width: 42, height: 36)
+            .background(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color.white)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .stroke(Theme.border, lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
     }

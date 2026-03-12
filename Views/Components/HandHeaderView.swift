@@ -1,10 +1,3 @@
-//
-//  HandHeaderView.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/11/26.
-//
-
 import SwiftUI
 
 struct HandHeaderView: View {
@@ -13,24 +6,26 @@ struct HandHeaderView: View {
     var body: some View {
         HStack {
             Text("Your Hand")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(Color(hex: "111827"))
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Theme.textSecondary)
+                .textCase(.uppercase)
+                .kerning(0.5)
 
             Spacer()
 
             if let seconds = remainingSeconds {
                 Text("\(seconds)s")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(seconds <= 5 ? Color(hex: "C2410C") : Color(hex: "6E4DD8"))
-                    .padding(.horizontal, 9)
-                    .frame(height: 28)
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundColor(seconds <= 5 ? Theme.crimson : Theme.navy)
+                    .padding(.horizontal, 8)
+                    .frame(height: 26)
                     .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(seconds <= 5 ? Color(hex: "FFF7ED") : Color(hex: "F5F3FF"))
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(seconds <= 5 ? Theme.crimsonLight : Theme.navyLight)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .stroke(seconds <= 5 ? Color(hex: "FED7AA") : Color(hex: "DDD6FE"), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .stroke(seconds <= 5 ? Theme.crimson.opacity(0.30) : Theme.navy.opacity(0.25), lineWidth: 1)
                     )
             }
         }
