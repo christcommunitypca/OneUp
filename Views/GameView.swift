@@ -25,21 +25,23 @@ struct GameView: View {
 
                     ScoreBoardView(
                         players: state.players,
-                        currentPlayerIndex: state.currentPlayerIndex
+                        currentPlayerIndex: state.currentPlayerIndex,
+                        winScore: state.config.winScore
                     )
 
                     bannerSection(state: state)
 
-                    WordAreaView()
+                    Spacer(minLength: 0)
 
-                
                     if state.consecutivePasses > 0 && state.phase == .playing {
                         CompactStatusView(
                             text: "Passes: \(state.consecutivePasses) of \(state.players.count)"
                         )
                     }
 
-                    Spacer(minLength: 0)
+                    WordAreaView()
+
+                    turnStrip
 
                     HandView()
                 }
@@ -87,5 +89,31 @@ struct GameView: View {
                 onSkip: { engine.declineBlindSwap() }
             )
         }
+    }
+
+    private var turnStrip: some View {
+        HStack(spacing: 8) {
+            if engine.isMyTurn {
+                Text("Your Turn")
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundColor(Color.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(Color(hex: "6E4DD8"))
+                    )
+            }
+
+            if engine.isMyTurn, let remainingSeconds = engine.remainingSeconds() {
+                Text("\(remainingSeconds)s")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(remainingSeconds <= 5 ? Color(hex: "C2410C") : Color(hex: "6E4DD8"))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 28)
+        .padding(.top, 2)
+        .padding(.bottom, 2)
     }
 }

@@ -68,6 +68,7 @@ extension GameEngine {
             pendingBlindSwap: nil,
             turnStartedAt: nil,
             turnExpiresAt: nil,
+            playedWordsThisRound: [],
             log: ["Game started"]
         )
 
@@ -90,33 +91,21 @@ extension GameEngine {
     }
 
     func refreshPendingTurnMirrors() {
-        var handSet = Set<Int>()
-
-        if let active = pendingTurn.activeHandIndex {
-            handSet.insert(active)
-        }
-
-        for draft in pendingTurn.insertDrafts {
-            handSet.insert(draft.handIndex)
-        }
-
-        for draft in pendingTurn.swapDrafts {
-            handSet.insert(draft.handIndex)
-        }
-
-        if pendingTurn.action == .discard {
-            for idx in pendingTurn.discardSelection {
-                handSet.insert(idx)
+        pendingTurn.selectedHandIndices = pendingTurn.selectedHandIndices
+            .filter { handIndex in
+                !pendingTurn.insertDrafts.contains(where: { $0.handIndex == handIndex }) &&
+                !pendingTurn.swapDrafts.contains(where: { $0.handIndex == handIndex })
             }
+            .sorted()
+
+        if let active = pendingTurn.activeHandIndex,
+           !pendingTurn.selectedHandIndices.contains(active) {
+            pendingTurn.activeHandIndex = nil
         }
 
-        pendingTurn.selectedHandIndices = Array(handSet).sorted()
-        pendingTurn.selectedWordIndices = pendingTurn.swapDrafts.map(\.wordIndex)
-        pendingTurn.insertionPositions = pendingTurn.insertDrafts.map(\.position)
-    }
-
-    private func draftedHandIndices() -> Set<Int> {
-        Set(pendingTurn.insertDrafts.map(\.handIndex) + pendingTurn.swapDrafts.map(\.handIndex))
+        pendingTurn.selectedWordIndices = pendingTurn.swapDrafts.map(\.wordIndex).sorted()
+        pendingTurn.insertionPositions = pendingTurn.insertDrafts.map(\.position).sorted()
+        pendingTurn.discardSelection = pendingTurn.selectedHandIndices.sorted()
     }
 
     private func buildDraftPreviewWord(
@@ -130,6 +119,16 @@ extension GameEngine {
         }
         for draft in pendingTurn.swapDrafts where !hand.indices.contains(draft.handIndex) {
             return nil
+        }
+
+        if state.currentWord.isEmpty {
+            let sortedOpeningInserts = pendingTurn.insertDrafts.sorted(by: { $0.order < $1.order })
+            guard !sortedOpeningInserts.isEmpty else { return [] }
+
+            return sortedOpeningInserts.map { draft in
+                let tile = hand[draft.handIndex]
+                return LetterTile(letter: tile.letter, playerIndex: actorIndex)
+            }
         }
 
         var baseWord = state.currentWord
@@ -192,6 +191,7 @@ extension GameEngine {
             state.consecutivePasses = 0
             state.pendingBlindSwap = nil
             state.lastEditingPlayerIndex = nil
+            state.playedWordsThisRound = []
             state.phase = .playing
             state.startTurnTimer()
 
@@ -215,19 +215,9 @@ extension GameEngine {
         switch reason {
         case .edit:
             state.consecutivePasses = 0
-
             advanceToNextPlayer(&state)
 
-        case .discard:
-            state.consecutivePasses += 1
-
-            if state.consecutivePasses >= state.players.count {
-                endRound(&state, lastPasserIndex: actorIndex)
-            } else {
-                advanceToNextPlayer(&state)
-            }
-
-        case .pass:
+        case .discard, .pass:
             state.consecutivePasses += 1
 
             if state.consecutivePasses >= state.players.count {
@@ -243,57 +233,80 @@ extension GameEngine {
         guard state.players[mine].hand.indices.contains(handIndex) else { return }
 
         roundMessage = nil
+        validationMessage = nil
 
-        if pendingTurn.action == .discard {
-            if pendingTurn.discardSelection.contains(handIndex) {
-                pendingTurn.discardSelection.removeAll { $0 == handIndex }
-            } else {
-                pendingTurn.discardSelection.append(handIndex)
+        if state.currentWord.isEmpty {
+            if let existing = pendingTurn.insertDrafts.firstIndex(where: { $0.handIndex == handIndex }) {
+                pendingTurn.insertDrafts.remove(at: existing)
+                pendingTurn.action = .none
+                refreshPendingTurnMirrors()
+                updateLivePreview()
+                return
             }
+
+            pendingTurn.insertDrafts.append(
+                DraftInsert(handIndex: handIndex, position: 0, order: nextDraftOrder())
+            )
+            pendingTurn.action = .none
+            pendingTurn.activeHandIndex = nil
             refreshPendingTurnMirrors()
             updateLivePreview()
             return
         }
 
-        if state.currentWord.isEmpty {
-            if let existing = pendingTurn.insertDrafts.firstIndex(where: { $0.handIndex == handIndex }) {
-                pendingTurn.insertDrafts.remove(at: existing)
-            } else {
-                pendingTurn.insertDrafts.append(
-                    DraftInsert(handIndex: handIndex, position: 0, order: nextDraftOrder())
-                )
-            }
-            pendingTurn.activeHandIndex = nil
+        if let existing = pendingTurn.insertDrafts.firstIndex(where: { $0.handIndex == handIndex }) {
+            pendingTurn.insertDrafts.remove(at: existing)
             pendingTurn.action = .none
             refreshPendingTurnMirrors()
             updateLivePreview()
             return
         }
 
-        if pendingTurn.activeHandIndex == handIndex {
-            pendingTurn.activeHandIndex = nil
-        } else {
-            guard !draftedHandIndices().contains(handIndex) else { return }
-            pendingTurn.activeHandIndex = handIndex
-            if pendingTurn.action != .swap {
-                pendingTurn.action = .insert
-            }
+        if let existing = pendingTurn.swapDrafts.firstIndex(where: { $0.handIndex == handIndex }) {
+            pendingTurn.swapDrafts.remove(at: existing)
+            pendingTurn.action = .none
+            refreshPendingTurnMirrors()
+            updateLivePreview()
+            return
         }
 
+        if pendingTurn.selectedHandIndices.contains(handIndex) {
+            pendingTurn.selectedHandIndices.removeAll { $0 == handIndex }
+            if pendingTurn.activeHandIndex == handIndex {
+                pendingTurn.activeHandIndex = nil
+            }
+            pendingTurn.action = .none
+            refreshPendingTurnMirrors()
+            updateLivePreview()
+            return
+        }
+
+        pendingTurn.selectedHandIndices.append(handIndex)
+        pendingTurn.selectedHandIndices = Array(Set(pendingTurn.selectedHandIndices)).sorted()
+
+        if pendingTurn.selectedHandCount == 1 {
+            pendingTurn.activeHandIndex = handIndex
+        } else {
+            pendingTurn.activeHandIndex = nil
+        }
+
+        pendingTurn.action = .none
         refreshPendingTurnMirrors()
         updateLivePreview()
     }
 
     func chooseInsertPosition(_ position: Int) {
         guard isMyTurn, let state else { return }
-        guard let handIndex = pendingTurn.activeHandIndex else { return }
+        guard pendingTurn.hasSingleSelection, let handIndex = pendingTurn.selectedHandIndices.first else { return }
 
         roundMessage = nil
+        validationMessage = nil
 
         if state.currentWord.isEmpty {
             pendingTurn.insertDrafts.append(
                 DraftInsert(handIndex: handIndex, position: 0, order: nextDraftOrder())
             )
+            pendingTurn.selectedHandIndices.removeAll { $0 == handIndex }
             pendingTurn.activeHandIndex = nil
             pendingTurn.action = .none
             refreshPendingTurnMirrors()
@@ -312,6 +325,7 @@ extension GameEngine {
         pendingTurn.insertDrafts.append(
             DraftInsert(handIndex: handIndex, position: basePosition, order: nextDraftOrder())
         )
+        pendingTurn.selectedHandIndices.removeAll { $0 == handIndex }
         pendingTurn.activeHandIndex = nil
         pendingTurn.action = .none
         refreshPendingTurnMirrors()
@@ -319,54 +333,83 @@ extension GameEngine {
     }
 
     func chooseSwapMode() {
-        guard canChooseSwap else { return }
-        roundMessage = nil
-        pendingTurn.action = .swap
-        refreshPendingTurnMirrors()
     }
 
     func chooseDiscardMode() {
-        guard isMyTurn else { return }
-
-        roundMessage = nil
-
-        if pendingTurn.hasDraftEdits {
-            validationMessage = "Clear drafted plays before discarding"
-            return
-        }
-
-        pendingTurn.action = .discard
-        pendingTurn.activeHandIndex = nil
-        pendingTurn.discardSelection.removeAll()
-        refreshPendingTurnMirrors()
-        updateLivePreview()
     }
 
     func chooseWordIndexForSwap(_ wordIndex: Int) {
         guard isMyTurn else { return }
         guard let state else { return }
         guard !state.currentWord.isEmpty else { return }
-        guard let handIndex = pendingTurn.activeHandIndex else { return }
+        guard pendingTurn.hasSingleSelection, let handIndex = pendingTurn.selectedHandIndices.first else { return }
+        guard pendingTurn.canAddAnotherSwap else {
+            validationMessage = "You can swap at most 2 letters"
+            return
+        }
 
         roundMessage = nil
+        validationMessage = nil
 
         guard let baseWordIndex = baseWordIndexForVisibleSwapIndex(
             wordIndex,
             baseWordCount: state.currentWord.count
         ) else {
-            validationMessage = "Choose a board letter to swap"
             return
         }
+
+        pendingTurn.swapDrafts.removeAll { $0.wordIndex == baseWordIndex }
 
         pendingTurn.swapDrafts.append(
             DraftSwap(handIndex: handIndex, wordIndex: baseWordIndex, order: nextDraftOrder())
         )
 
+        pendingTurn.selectedHandIndices.removeAll { $0 == handIndex }
         pendingTurn.activeHandIndex = nil
         pendingTurn.action = .none
 
         refreshPendingTurnMirrors()
         updateLivePreview()
+    }
+
+    func discardSelectedLetters() {
+        guard var state else { return }
+        guard let actorIndex = activeActorIndex(for: state) else { return }
+
+        let drafted = Set(pendingTurn.insertDrafts.map(\.handIndex) + pendingTurn.swapDrafts.map(\.handIndex))
+        let selected = Set(pendingTurn.selectedHandIndices)
+
+        let discardIndices: [Int]
+        if state.currentWord.isEmpty && selected.isEmpty && !pendingTurn.insertDrafts.isEmpty && pendingTurn.swapDrafts.isEmpty {
+            discardIndices = pendingTurn.insertDrafts.map(\.handIndex).sorted()
+        } else {
+            discardIndices = Array(selected.subtracting(drafted)).sorted()
+        }
+
+        guard !discardIndices.isEmpty else {
+            validationMessage = "Select cards to discard"
+            return
+        }
+
+        var actorHand = state.players[actorIndex].hand
+
+        LetterDeck.rebuildDrawPileIfNeeded(drawPile: &state.drawPile, discardPile: &state.discardPile)
+        LetterDeck.discardAndDraw(
+            hand: &actorHand,
+            discardIndices: discardIndices,
+            drawPile: &state.drawPile,
+            discardPile: &state.discardPile
+        )
+        LetterDeck.rebuildDrawPileIfNeeded(drawPile: &state.drawPile, discardPile: &state.discardPile)
+
+        state.players[actorIndex].hand = actorHand
+        state.log.insert("\(state.players[actorIndex].displayName) discarded \(discardIndices.count) card(s)", at: 0)
+
+        validationMessage = nil
+        roundMessage = nil
+
+        finishTurn(&state, actorIndex: actorIndex, reason: .discard)
+        publishAndSchedule(state)
     }
 
     func clearPendingTurn() {
@@ -376,11 +419,6 @@ extension GameEngine {
     }
 
     func playSelectedAction() async {
-        if pendingTurn.action == .discard {
-            confirmDiscard()
-            return
-        }
-
         await commitDraftTurn()
     }
 
@@ -392,18 +430,19 @@ extension GameEngine {
         var visibleGapCursor = 0
 
         for gap in 0...baseWordCount {
-            if visibleGapCursor == visibleGap {
+            let insertsHere = (insertsByPosition[gap] ?? []).sorted { $0.order < $1.order }
+            let visibleGapCountForThisBaseGap = 1 + insertsHere.count
+
+            if visibleGapCursor...(visibleGapCursor + visibleGapCountForThisBaseGap - 1) ~= visibleGap {
                 return gap
             }
-            visibleGapCursor += 1
 
-            let insertsHere = (insertsByPosition[gap] ?? []).sorted { $0.order < $1.order }
-            visibleGapCursor += insertsHere.count
+            visibleGapCursor += visibleGapCountForThisBaseGap
         }
 
         return nil
     }
-    
+
     private func baseWordIndexForVisibleSwapIndex(
         _ visibleIndex: Int,
         baseWordCount: Int
@@ -431,7 +470,7 @@ extension GameEngine {
 
         return nil
     }
-    
+
     private func commitDraftTurn() async {
         guard var state else { return }
         guard let actorIndex = activeActorIndex(for: state) else { return }
@@ -446,13 +485,18 @@ extension GameEngine {
         }
 
         let newWordString = previewWord.map(\.letter).joined()
-
         let originalWordString = originalWord.map(\.letter).joined()
+
         guard newWordString != originalWordString else {
             validationMessage = "Turn must change the word"
             return
         }
-        
+
+        guard !state.playedWordsThisRound.contains(newWordString) else {
+            validationMessage = "That word was already played this round"
+            return
+        }
+
         isValidating = true
         validationMessage = "Checking \"\(newWordString)\"..."
 
@@ -486,8 +530,10 @@ extension GameEngine {
 
         state.players[actorIndex].hand = newHand
         state.currentWord = previewWord
-
         state.lastEditingPlayerIndex = actorIndex
+        state.playedWordsThisRound.append(newWordString)
+        state.log.insert("\(state.players[actorIndex].displayName) played → \(newWordString)", at: 0)
+
         validationMessage = nil
         roundMessage = nil
 
@@ -496,32 +542,7 @@ extension GameEngine {
     }
 
     func confirmDiscard() {
-        guard var state else { return }
-        guard let actorIndex = activeActorIndex(for: state) else { return }
-        guard !pendingTurn.discardSelection.isEmpty else {
-            validationMessage = "Select cards to discard"
-            return
-        }
-
-        let discardIndices = pendingTurn.discardSelection.sorted()
-        var actorHand = state.players[actorIndex].hand
-
-        LetterDeck.rebuildDrawPileIfNeeded(drawPile: &state.drawPile, discardPile: &state.discardPile)
-        LetterDeck.discardAndDraw(
-            hand: &actorHand,
-            discardIndices: discardIndices,
-            drawPile: &state.drawPile,
-            discardPile: &state.discardPile
-        )
-
-        LetterDeck.rebuildDrawPileIfNeeded(drawPile: &state.drawPile, discardPile: &state.discardPile)
-
-        state.players[actorIndex].hand = actorHand
-        validationMessage = nil
-        roundMessage = nil
-
-        finishTurn(&state, actorIndex: actorIndex, reason: .discard)
-        publishAndSchedule(state)
+        discardSelectedLetters()
     }
 
     func confirmSwap() async {
@@ -535,7 +556,7 @@ extension GameEngine {
         validationMessage = nil
         roundMessage = nil
         clearPendingTurn()
-
+        state.log.insert("\(state.players[actorIndex].displayName) passed", at: 0)
 
         finishTurn(&state, actorIndex: actorIndex, reason: .pass)
         publishAndSchedule(state)
@@ -545,7 +566,6 @@ extension GameEngine {
         timerTask?.cancel()
 
         guard !state.players.isEmpty else { return }
-        
 
         if state.currentWord.isEmpty {
             let nextStarter = (lastPasserIndex + 1) % state.players.count
@@ -558,6 +578,7 @@ extension GameEngine {
 
             state.pendingBlindSwap = nil
             state.lastEditingPlayerIndex = nil
+            state.playedWordsThisRound = []
             state.currentPlayerIndex = nextStarter
             state.phase = .roundOver
             state.clearTurnTimer()
@@ -578,8 +599,9 @@ extension GameEngine {
         let scorerName = state.players[scorerIndex].displayName
 
         state.players[scorerIndex].score += points
+        state.log.insert("\(scorerName) scored \(points) for \"\(finalWord)\"", at: 0)
 
-        if state.players[scorerIndex].score >= Config.winScore {
+        if state.players[scorerIndex].score >= state.config.winScore {
             state.phase = .gameOver
             state.winnerName = scorerName
             state.clearTurnTimer()

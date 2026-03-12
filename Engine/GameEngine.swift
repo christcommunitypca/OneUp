@@ -18,6 +18,7 @@ final class GameEngine: ObservableObject {
     @Published var livePreviewWord: [LetterTile] = []
     @Published var livePreviewIsValid: Bool? = nil
     @Published var roundMessage: String? = nil
+    @Published var timerNow: Date = Date()
     
     var cpuTask: Task<Void, Never>?
     var timerTask: Task<Void, Never>?
@@ -59,34 +60,44 @@ final class GameEngine: ObservableObject {
         pendingTurn.selectedHandIndices
     }
 
-    var canChooseSwap: Bool {
-        guard isMyTurn, let state else { return false }
-        return pendingTurn.activeHandIndex != nil &&
-               !state.currentWord.isEmpty &&
-               pendingTurn.action != .discard
+    var hasSingleHandSelection: Bool {
+        isMyTurn && pendingTurn.hasSingleSelection
     }
 
-    var canChooseDiscard: Bool {
-        guard isMyTurn else { return false }
-        return !pendingTurn.hasDraftEdits
+    var hasMultiHandSelection: Bool {
+        isMyTurn && pendingTurn.hasMultiSelection
     }
 
-    var canChoosePlay: Bool {
+    var canDiscardSelection: Bool {
         guard isMyTurn else { return false }
 
-        if pendingTurn.action == .discard {
-            return !pendingTurn.discardSelection.isEmpty
+        if pendingTurn.selectedHandCount > 0 {
+            return true
         }
 
-        return pendingTurn.hasDraftEdits
+        if state?.currentWord.isEmpty == true,
+           !pendingTurn.insertDrafts.isEmpty,
+           pendingTurn.swapDrafts.isEmpty {
+            return true
+        }
+
+        return false
+    }
+
+    var canPassTurn: Bool {
+        isMyTurn
+    }
+
+    var canClearSelection: Bool {
+        isMyTurn && !pendingTurn.isEmpty
+    }
+
+    var canCommitDraftTurn: Bool {
+        isMyTurn && pendingTurn.hasDraftEdits
     }
 
     var playButtonTitle: String {
-        pendingTurn.action == .discard ? "Discard & Draw" : "Play"
-    }
-
-    var showOnlyDiscardHint: Bool {
-        false
+        "Play"
     }
     
     var roundTransitionTask: Task<Void, Never>?
@@ -106,6 +117,7 @@ final class GameEngine: ObservableObject {
     func advanceToNextPlayer(_ state: inout GameState) {
         state.currentPlayerIndex = state.nextPlayerIndex
         state.startTurnTimer()
+        timerNow = Date()
     }
 
     func buildInsertedWord(

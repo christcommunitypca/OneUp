@@ -96,7 +96,27 @@ struct WordTileView: View {
     let isStaged: Bool
     let isSwapTarget: Bool
     let playerIndex: Int
+    let width: CGFloat
+    let height: CGFloat
     let action: (() -> Void)?
+
+    init(
+        tile: LetterTile,
+        isStaged: Bool,
+        isSwapTarget: Bool,
+        playerIndex: Int,
+        width: CGFloat = 44,
+        height: CGFloat = 54,
+        action: (() -> Void)?
+    ) {
+        self.tile = tile
+        self.isStaged = isStaged
+        self.isSwapTarget = isSwapTarget
+        self.playerIndex = playerIndex
+        self.width = width
+        self.height = height
+        self.action = action
+    }
 
     var body: some View {
         Button(action: { action?() }) {
@@ -108,11 +128,13 @@ struct WordTileView: View {
                 )
 
                 Text(tile.letter)
-                    .font(.system(size: 22, weight: .black, design: .serif))
+                    .font(.system(size: min(22, max(14, width * 0.52)), weight: .black, design: .serif))
+                    .minimumScaleFactor(0.45)
+                    .lineLimit(1)
                     .foregroundColor(letterColor)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
-            .frame(width: 44, height: 54)
+            .frame(width: width, height: height)
             .shadow(color: shadowColor, radius: shadowRadius, y: shadowY)
         }
         .buttonStyle(.plain)
@@ -164,7 +186,28 @@ struct SlotGapView: View {
     let position: Int
     let isActive: Bool
     let isChosen: Bool
+    let activeWidth: CGFloat
+    let inactiveWidth: CGFloat
+    let tileHeight: CGFloat
     let action: () -> Void
+
+    init(
+        position: Int,
+        isActive: Bool,
+        isChosen: Bool,
+        activeWidth: CGFloat = 24,
+        inactiveWidth: CGFloat = 8,
+        tileHeight: CGFloat = 54,
+        action: @escaping () -> Void
+    ) {
+        self.position = position
+        self.isActive = isActive
+        self.isChosen = isChosen
+        self.activeWidth = activeWidth
+        self.inactiveWidth = inactiveWidth
+        self.tileHeight = tileHeight
+        self.action = action
+    }
 
     var body: some View {
         Button(action: {
@@ -182,11 +225,11 @@ struct SlotGapView: View {
                                     style: StrokeStyle(lineWidth: 1.2, dash: isChosen ? [] : [3, 3])
                                 )
                         )
-                        .frame(width: 24, height: 54)
+                        .frame(width: activeWidth, height: tileHeight)
                         .contentShape(Rectangle())
                 } else {
                     Color.clear
-                        .frame(width: 8, height: 54)
+                        .frame(width: inactiveWidth, height: tileHeight)
                 }
             }
         }

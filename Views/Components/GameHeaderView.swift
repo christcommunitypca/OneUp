@@ -16,55 +16,43 @@ struct GameHeaderView: View {
     let onSettings: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Word Builder")
-                    .font(.system(size: 24, weight: .black, design: .serif))
-                    .italic()
-                    .foregroundColor(Color(hex: "6E4DD8"))
+        VStack(spacing: 8) {
+            Text("One Up")
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundColor(Color(hex: "2563EB"))
+                .frame(maxWidth: .infinity)
 
-                HStack(spacing: 6) {
-                    Text(isMyTurn ? "Your turn" : "\(state.currentPlayer.displayName)'s turn")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(Color(hex: "4B5563"))
+            Text("Add a letter. Steal the lead!")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundColor(Color(hex: "60A5FA"))
+                .frame(maxWidth: .infinity)
 
-                    if let remainingSeconds {
-                        Text("• \(remainingSeconds)s")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(remainingSeconds <= 5 ? Color(hex: "C2410C") : Color(hex: "6E4DD8"))
-                    }
-                }
+            HStack(spacing: 14) {
+                GameHeaderIconButton(systemName: "house", action: onNewGame)
+                GameHeaderIconButton(systemName: "questionmark.circle", action: onHelp)
             }
-
-            Spacer()
-
-            HStack(spacing: 8) {
-                GameHeaderButton(title: "?", action: onHelp)
-                GameHeaderButton(title: "New Game", action: onNewGame)
-                GameHeaderButton(title: "Settings", action: onSettings)
-            }
+            .frame(maxWidth: .infinity)
         }
     }
 }
 
-private struct GameHeaderButton: View {
-    let title: String
+private struct GameHeaderIconButton: View {
+    let systemName: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(Color(hex: "111827"))
-                .padding(.horizontal, 12)
-                .frame(height: 34)
+            Image(systemName: systemName)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(Color(hex: "1E3A8A"))
+                .frame(width: 40, height: 40)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(.white)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(Color(hex: "D1D5DB"), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color(hex: "D6EAFE"), lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)

@@ -5,11 +5,25 @@ struct WordAreaView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            WordAreaHeaderView(
-                statusTitle: statusTitle,
-                statusSubtitle: statusSubtitle,
-                displayedPoints: displayedPoints
-            )
+            HStack {
+                Spacer()
+
+                if let displayedPoints {
+                    Text("Points: \(displayedPoints)")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(hex: "6E4DD8"))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(Color(hex: "F5F3FF"))
+                        )
+                        .overlay(
+                            Capsule(style: .continuous)
+                                .stroke(Color(hex: "DDD6FE"), lineWidth: 1)
+                        )
+                }
+            }
 
             WordBoardSurfaceView(
                 isOpeningRound: isOpeningRound,
@@ -31,7 +45,7 @@ struct WordAreaView: View {
                 WordMessageBannerView(message: message)
             }
         }
-        .padding(12)
+        .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color.white)
@@ -45,41 +59,6 @@ struct WordAreaView: View {
     private var isOpeningRound: Bool {
         guard let state = engine.state else { return true }
         return state.currentWord.isEmpty
-    }
-
-    private var statusTitle: String {
-        if let state = engine.state, state.currentWord.isEmpty {
-            return "Start the round"
-        }
-        if engine.pendingTurn.action == .discard {
-            return "Discard selected cards"
-        }
-        if engine.pendingTurn.action == .swap, engine.pendingTurn.activeHandIndex != nil {
-            return "Choose a letter to swap"
-        }
-        if engine.pendingTurn.hasDraftEdits {
-            return "Preview"
-        }
-        return "Board"
-    }
-
-    private var statusSubtitle: String {
-        if let state = engine.state, state.currentWord.isEmpty {
-            return "Tap letters in the order you want them played."
-        }
-        if engine.pendingTurn.action == .discard {
-            return "Select the cards you want to throw away."
-        }
-        if engine.pendingTurn.action == .swap, engine.pendingTurn.activeHandIndex != nil {
-            return "Tap a board letter to replace it."
-        }
-        if engine.pendingTurn.activeHandIndex != nil {
-            return "Tap a gap to place the active card."
-        }
-        if engine.pendingTurn.hasDraftEdits {
-            return "Add more edits or press Play."
-        }
-        return "Select a card to begin your turn."
     }
 
     private var displayedPoints: Int? {

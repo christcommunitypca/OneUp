@@ -33,32 +33,31 @@ struct HandView: View {
                     }
                 )
 
-                if myTurn {
-                    HandActionAreaView(
-                        isValidating: engine.isValidating,
-                        playButtonTitle: engine.playButtonTitle,
-                        playIsDiscard: engine.pendingTurn.action == .discard,
-                        canChoosePlay: engine.canChoosePlay,
-                        canChooseSwap: engine.canChooseSwap,
-                        canChooseDiscard: engine.canChooseDiscard,
-                        swapIsActive: engine.pendingTurn.action == .swap,
-                        onPlay: {
-                            Task { await engine.playSelectedAction() }
-                        },
-                        onSwap: {
-                            engine.chooseSwapMode()
-                        },
-                        onDiscard: {
-                            engine.chooseDiscardMode()
-                        },
-                        onPass: {
-                            engine.pass()
-                        },
-                        onClear: {
-                            engine.clearPendingTurn()
-                        }
-                    )
-                }
+                HandActionAreaView(
+                    isMyTurn: myTurn,
+                    isValidating: engine.isValidating,
+                    playButtonTitle: engine.playButtonTitle,
+                    playIsDiscard: false,
+                    canChoosePlay: engine.canCommitDraftTurn,
+                    canChooseSwap: false,
+                    canChooseDiscard: engine.canDiscardSelection,
+                    swapIsActive: false,
+                    onPlay: {
+                        Task { await engine.playSelectedAction() }
+                    },
+                    onSwap: {
+                        engine.chooseSwapMode()
+                    },
+                    onDiscard: {
+                        engine.discardSelectedLetters()
+                    },
+                    onPass: {
+                        engine.pass()
+                    },
+                    onClear: {
+                        engine.clearPendingTurn()
+                    }
+                )
             }
             .padding(.horizontal, 12)
             .padding(.top, 10)
@@ -76,33 +75,27 @@ struct HandView: View {
     private func isDrafted(_ handIndex: Int) -> Bool {
         engine.pendingTurn.insertDrafts.contains(where: { $0.handIndex == handIndex }) ||
         engine.pendingTurn.swapDrafts.contains(where: { $0.handIndex == handIndex }) ||
-        (engine.pendingTurn.activeHandIndex == handIndex && engine.pendingTurn.action != .discard)
+        engine.pendingTurn.selectedHandIndices.contains(handIndex)
     }
 
     private func draftOrder(_ handIndex: Int) -> Int? {
-        if engine.pendingTurn.activeHandIndex == handIndex &&
-            !engine.pendingTurn.insertDrafts.contains(where: { $0.handIndex == handIndex }) &&
-            !engine.pendingTurn.swapDrafts.contains(where: { $0.handIndex == handIndex }) {
-            return nil
-        }
-
         if let insert = engine.pendingTurn.insertDrafts.first(where: { $0.handIndex == handIndex }) {
             return insert.order
         }
         if let swap = engine.pendingTurn.swapDrafts.first(where: { $0.handIndex == handIndex }) {
             return swap.order
         }
+
+        let selected = Array(engine.pendingTurn.selectedHandIndices).sorted()
+        if let idx = selected.firstIndex(of: handIndex) {
+            return idx + 1
+        }
+
         return nil
     }
 
     private func tileOpacity(index: Int, isMyTurn: Bool) -> Double {
         guard isMyTurn else { return 0.92 }
-        if engine.pendingTurn.action == .discard {
-            return 1.0
-        }
-        if let active = engine.pendingTurn.activeHandIndex, active != index, engine.pendingTurn.action == .swap {
-            return 0.95
-        }
         return 1.0
     }
 }

@@ -37,23 +37,52 @@ struct WordBoardSurfaceView: View {
     }
 
     private var openingBoard: some View {
-        VStack {
-            if !livePreviewWord.isEmpty {
-                tileRow(livePreviewWord)
-            } else {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(Color(hex: "D1D5DB"), style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
-                    .frame(height: 82)
-                    .overlay(
-                        VStack(spacing: 4) {
-                            Text("Your opening word will appear here")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color(hex: "6E4DD8"))
-                            Text("Tap hand cards to build it.")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color(hex: "6B7280"))
-                        }
-                    )
+        GeometryReader { proxy in
+            let metrics = boardMetrics(containerWidth: proxy.size.width, letterCount: max(1, livePreviewWord.count))
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    SlotGapView(
+                        position: 0,
+                        isActive: false,
+                        isChosen: false,
+                        activeWidth: metrics.gapWidth,
+                        inactiveWidth: metrics.gapWidth,
+                        tileHeight: metrics.tileHeight
+                    ) { }
+
+                    ForEach(Array(livePreviewWord.enumerated()), id: \.element.id) { _, tile in
+                        WordTileView(
+                            tile: tile,
+                            isStaged: true,
+                            isSwapTarget: false,
+                            playerIndex: max(0, tile.playerIndex),
+                            width: metrics.tileWidth,
+                            height: metrics.tileHeight,
+                            action: nil
+                        )
+
+                        SlotGapView(
+                            position: 0,
+                            isActive: false,
+                            isChosen: false,
+                            activeWidth: metrics.gapWidth,
+                            inactiveWidth: metrics.gapWidth,
+                            tileHeight: metrics.tileHeight
+                        ) { }
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        }
+        .frame(height: 82)
+        .overlay(alignment: .topLeading) {
+            if livePreviewWord.isEmpty {
+                Text("Tap hand letters in the order you want them played.")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color(hex: "6B7280"))
+                    .padding(.top, 4)
+                    .padding(.leading, 4)
             }
         }
     }
@@ -61,68 +90,57 @@ struct WordBoardSurfaceView: View {
     private var interactiveBoard: some View {
         let displayWord = !livePreviewWord.isEmpty ? livePreviewWord : currentWord
 
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 0) {
-                gapView(position: 0)
+        return GeometryReader { proxy in
+            let metrics = boardMetrics(containerWidth: proxy.size.width, letterCount: max(1, displayWord.count))
 
-                ForEach(Array(displayWord.enumerated()), id: \.element.id) { index, tile in
-                    WordTileView(
-                        tile: tile,
-                        isStaged: isPreviewInsertedTile(index: index, tile: tile),
-                        isSwapTarget: pendingTurn.swapDrafts.contains(where: { $0.wordIndex == index }),
-                        playerIndex: max(0, tile.playerIndex),
-                        action: swapAction(for: index)
-                    )
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    gapView(position: 0, gapWidth: metrics.gapWidth, tileHeight: metrics.tileHeight)
 
-                    gapView(position: index + 1)
+                    ForEach(Array(displayWord.enumerated()), id: \.element.id) { index, tile in
+                        WordTileView(
+                            tile: tile,
+                            isStaged: isPreviewInsertedTile(index: index, tile: tile),
+                            isSwapTarget: pendingTurn.swapDrafts.contains(where: { $0.wordIndex == index }),
+                            playerIndex: max(0, tile.playerIndex),
+                            width: metrics.tileWidth,
+                            height: metrics.tileHeight,
+                            action: boardTapAction(for: index)
+                        )
+
+                        gapView(position: index + 1, gapWidth: metrics.gapWidth, tileHeight: metrics.tileHeight)
+                    }
                 }
+                .padding(.vertical, 2)
             }
-            .padding(.vertical, 2)
         }
+        .frame(height: 82)
     }
 
     @ViewBuilder
-    private func gapView(position: Int) -> some View {
-        let active = isMyTurn &&
-            pendingTurn.action != .discard &&
-            pendingTurn.activeHandIndex != nil &&
-            pendingTurn.action != .swap
-
+    private func gapView(position: Int, gapWidth: CGFloat, tileHeight: CGFloat) -> some View {
+        let active = isMyTurn && pendingTurn.hasSingleSelection
         let chosen = pendingTurn.insertDrafts.contains(where: { $0.position == position })
 
         SlotGapView(
             position: position,
             isActive: active,
-            isChosen: chosen
+            isChosen: chosen,
+            activeWidth: gapWidth,
+            inactiveWidth: max(6, gapWidth * 0.42),
+            tileHeight: tileHeight
         ) {
+            guard active else { return }
             onChooseInsertPosition(position)
         }
     }
 
-    private func swapAction(for index: Int) -> (() -> Void)? {
+    private func boardTapAction(for index: Int) -> (() -> Void)? {
         guard isMyTurn else { return nil }
-        guard pendingTurn.action == .swap else { return nil }
-        guard pendingTurn.activeHandIndex != nil else { return nil }
+        guard pendingTurn.hasSingleSelection else { return nil }
 
         return {
             onChooseSwapIndex(index)
-        }
-    }
-
-    private func tileRow(_ tiles: [LetterTile]) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                ForEach(Array(tiles.enumerated()), id: \.element.id) { index, tile in
-                    WordTileView(
-                        tile: tile,
-                        isStaged: isPreviewInsertedTile(index: index, tile: tile),
-                        isSwapTarget: pendingTurn.swapDrafts.contains(where: { $0.wordIndex == index }),
-                        playerIndex: max(0, tile.playerIndex),
-                        action: nil
-                    )
-                }
-            }
-            .padding(.vertical, 2)
         }
     }
 
@@ -131,5 +149,22 @@ struct WordBoardSurfaceView: View {
         if index >= currentWord.count { return true }
         if currentWord[index].id != tile.id { return true }
         return false
+    }
+
+    private func boardMetrics(containerWidth: CGFloat, letterCount: Int) -> (tileWidth: CGFloat, gapWidth: CGFloat, tileHeight: CGFloat) {
+        let baseTileWidth: CGFloat = 44
+        let baseGapWidth: CGFloat = 24
+        let tileHeight: CGFloat = 54
+
+        let slotCount = letterCount + 1
+        let desiredWidth = (CGFloat(letterCount) * baseTileWidth) + (CGFloat(slotCount) * baseGapWidth)
+        let safeWidth = max(140, containerWidth - 4)
+        let scale = min(1, safeWidth / desiredWidth)
+
+        return (
+            tileWidth: max(24, baseTileWidth * scale),
+            gapWidth: max(10, baseGapWidth * scale),
+            tileHeight: tileHeight
+        )
     }
 }

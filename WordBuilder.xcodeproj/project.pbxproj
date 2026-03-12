@@ -41,6 +41,16 @@
 		50A07AC82F61CBD700062587 /* HandHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AC72F61CBD300062587 /* HandHeaderView.swift */; };
 		50A07ACA2F61CBEB00062587 /* HandTilesRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AC92F61CBE000062587 /* HandTilesRowView.swift */; };
 		50A07ACC2F61CC0A00062587 /* HandActionAreaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ACB2F61CBFE00062587 /* HandActionAreaView.swift */; };
+		50A07ACE2F62266300062587 /* SetupHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ACD2F62265B00062587 /* SetupHeaderView.swift */; };
+		50A07AD02F62267400062587 /* SetupModeStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ACF2F62266D00062587 /* SetupModeStripView.swift */; };
+		50A07AD22F62268300062587 /* SetupLocalCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AD12F62267D00062587 /* SetupLocalCardView.swift */; };
+		50A07AD42F62269600062587 /* SetupOnlineCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AD32F62269000062587 /* SetupOnlineCardView.swift */; };
+		50A07AD62F6226A500062587 /* SetupRulesCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AD52F6226A100062587 /* SetupRulesCardView.swift */; };
+		50A07AD82F6226B000062587 /* SetupFooterButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AD72F6226AC00062587 /* SetupFooterButtonsView.swift */; };
+		50A07ADA2F6226BC00062587 /* SetupSharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07AD92F6226B800062587 /* SetupSharedViews.swift */; };
+		50A07ADC2F622F4E00062587 /* SettingsProfileCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ADB2F622F4700062587 /* SettingsProfileCardView.swift */; };
+		50A07ADE2F622F5C00062587 /* SettingsAccountCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ADD2F622F5700062587 /* SettingsAccountCardView.swift */; };
+		50A07AE02F622F6900062587 /* SettingsInfoRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ADF2F622F6400062587 /* SettingsInfoRowView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +105,16 @@
 		50A07AC72F61CBD300062587 /* HandHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandHeaderView.swift; sourceTree = "<group>"; };
 		50A07AC92F61CBE000062587 /* HandTilesRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTilesRowView.swift; sourceTree = "<group>"; };
 		50A07ACB2F61CBFE00062587 /* HandActionAreaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandActionAreaView.swift; sourceTree = "<group>"; };
+		50A07ACD2F62265B00062587 /* SetupHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupHeaderView.swift; sourceTree = "<group>"; };
+		50A07ACF2F62266D00062587 /* SetupModeStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupModeStripView.swift; sourceTree = "<group>"; };
+		50A07AD12F62267D00062587 /* SetupLocalCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupLocalCardView.swift; sourceTree = "<group>"; };
+		50A07AD32F62269000062587 /* SetupOnlineCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupOnlineCardView.swift; sourceTree = "<group>"; };
+		50A07AD52F6226A100062587 /* SetupRulesCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupRulesCardView.swift; sourceTree = "<group>"; };
+		50A07AD72F6226AC00062587 /* SetupFooterButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFooterButtonsView.swift; sourceTree = "<group>"; };
+		50A07AD92F6226B800062587 /* SetupSharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupSharedViews.swift; sourceTree = "<group>"; };
+		50A07ADB2F622F4700062587 /* SettingsProfileCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProfileCardView.swift; sourceTree = "<group>"; };
+		50A07ADD2F622F5700062587 /* SettingsAccountCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAccountCardView.swift; sourceTree = "<group>"; };
+		50A07ADF2F622F6400062587 /* SettingsInfoRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsInfoRowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -206,6 +226,16 @@
 		5080F0C92F60A4E400904DBE /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				50A07ADF2F622F6400062587 /* SettingsInfoRowView.swift */,
+				50A07ADD2F622F5700062587 /* SettingsAccountCardView.swift */,
+				50A07ADB2F622F4700062587 /* SettingsProfileCardView.swift */,
+				50A07AD92F6226B800062587 /* SetupSharedViews.swift */,
+				50A07AD72F6226AC00062587 /* SetupFooterButtonsView.swift */,
+				50A07AD52F6226A100062587 /* SetupRulesCardView.swift */,
+				50A07AD32F62269000062587 /* SetupOnlineCardView.swift */,
+				50A07AD12F62267D00062587 /* SetupLocalCardView.swift */,
+				50A07ACF2F62266D00062587 /* SetupModeStripView.swift */,
+				50A07ACD2F62265B00062587 /* SetupHeaderView.swift */,
 				50A07ACB2F61CBFE00062587 /* HandActionAreaView.swift */,
 				50A07AC92F61CBE000062587 /* HandTilesRowView.swift */,
 				50A07AC72F61CBD300062587 /* HandHeaderView.swift */,
@@ -395,9 +425,12 @@
 			files = (
 				50A07ACA2F61CBEB00062587 /* HandTilesRowView.swift in Sources */,
 				5080F0D02F60A4E400904DBE /* SupabaseManager.swift in Sources */,
+				50A07AD42F62269600062587 /* SetupOnlineCardView.swift in Sources */,
 				5080F0D12F60A4E400904DBE /* Config.swift in Sources */,
 				5080F0D22F60A4E400904DBE /* LocalWordList.swift in Sources */,
 				50A07AC02F61CAB600062587 /* GameBannerViews.swift in Sources */,
+				50A07AE02F622F6900062587 /* SettingsInfoRowView.swift in Sources */,
+				50A07ACE2F62266300062587 /* SetupHeaderView.swift in Sources */,
 				5080F0D32F60A4E400904DBE /* WordBuilderApp.swift in Sources */,
 				5080F0D42F60A4E400904DBE /* GameView.swift in Sources */,
 				50A07AC42F61CB4600062587 /* WordBoardSurfaceView.swift in Sources */,
@@ -407,9 +440,12 @@
 				5080F0D72F60A4E400904DBE /* ContentView.swift in Sources */,
 				5080F0D82F60A4E400904DBE /* CPUPlayer.swift in Sources */,
 				5080F0D92F60A4E400904DBE /* LetterDeck.swift in Sources */,
+				50A07AD62F6226A500062587 /* SetupRulesCardView.swift in Sources */,
+				50A07ADA2F6226BC00062587 /* SetupSharedViews.swift in Sources */,
 				5080F0DA2F60A4E400904DBE /* AuthManager.swift in Sources */,
 				5080F0DB2F60A4E400904DBE /* DictionaryService.swift in Sources */,
 				5080F0DC2F60A4E400904DBE /* GameModels.swift in Sources */,
+				50A07AD22F62268300062587 /* SetupLocalCardView.swift in Sources */,
 				5080F0DD2F60A4E400904DBE /* WordAreaView.swift in Sources */,
 				5080F0DE2F60A4E400904DBE /* GameEngine.swift in Sources */,
 				5080F0DF2F60A4E400904DBE /* TileViews.swift in Sources */,
@@ -418,12 +454,16 @@
 				50A07AB92F6124F700062587 /* GameEngine+Timer.swift in Sources */,
 				50A07ABA2F6124F700062587 /* GameEngine+Turns.swift in Sources */,
 				50A07ABB2F6124F700062587 /* GameEngine+CPU.swift in Sources */,
+				50A07AD02F62267400062587 /* SetupModeStripView.swift in Sources */,
 				50A07AC62F61CB8200062587 /* WordMessageBannerView.swift in Sources */,
 				50A07ABC2F6124F700062587 /* GameEngine+Multiplayer.swift in Sources */,
 				50A07AC82F61CBD700062587 /* HandHeaderView.swift in Sources */,
+				50A07ADC2F622F4E00062587 /* SettingsProfileCardView.swift in Sources */,
+				50A07ADE2F622F5C00062587 /* SettingsAccountCardView.swift in Sources */,
 				5080F0E12F60A4E400904DBE /* SetupView.swift in Sources */,
 				5080F0EC2F60E71C00904DBE /* SettingsView.swift in Sources */,
 				50A07ACC2F61CC0A00062587 /* HandActionAreaView.swift in Sources */,
+				50A07AD82F6226B000062587 /* SetupFooterButtonsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

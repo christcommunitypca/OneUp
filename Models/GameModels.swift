@@ -84,17 +84,20 @@ struct GameConfig: Codable, Equatable {
     var timer: TurnTimerOption
     var allowBlindSwapAfterTimeout: Bool
     var handSize: Int
+    var winScore: Int
 
     init(
         mode: GameMode = .easy,
         timer: TurnTimerOption = .off,
         allowBlindSwapAfterTimeout: Bool = true,
-        handSize: Int = 7
+        handSize: Int = 7,
+        winScore: Int = 20
     ) {
         self.mode = mode
         self.timer = timer
         self.allowBlindSwapAfterTimeout = allowBlindSwapAfterTimeout
         self.handSize = handSize
+        self.winScore = winScore
     }
 }
 
@@ -105,7 +108,6 @@ enum PendingAction: String, Codable {
     case discard
 }
 
-// One drafted insert in the current turn
 struct DraftInsert: Identifiable, Codable, Equatable {
     let id: UUID
     let handIndex: Int
@@ -120,7 +122,6 @@ struct DraftInsert: Identifiable, Codable, Equatable {
     }
 }
 
-// One drafted swap in the current turn
 struct DraftSwap: Identifiable, Codable, Equatable {
     let id: UUID
     let handIndex: Int
@@ -138,15 +139,12 @@ struct DraftSwap: Identifiable, Codable, Equatable {
 struct PendingTurn: Codable, Equatable {
     var action: PendingAction
 
-    // The currently armed hand card
     var activeHandIndex: Int?
 
-    // Legacy mirror fields so current UI does not explode
     var selectedHandIndices: [Int]
     var selectedWordIndices: [Int]
     var insertionPositions: [Int]
 
-    // New draft-based turn model
     var insertDrafts: [DraftInsert]
     var swapDrafts: [DraftSwap]
     var discardSelection: [Int]
@@ -173,6 +171,26 @@ struct PendingTurn: Codable, Equatable {
 
     var hasDraftEdits: Bool {
         !insertDrafts.isEmpty || !swapDrafts.isEmpty
+    }
+
+    var selectedHandCount: Int {
+        Set(selectedHandIndices).count
+    }
+
+    var hasSingleSelection: Bool {
+        selectedHandCount == 1
+    }
+
+    var hasMultiSelection: Bool {
+        selectedHandCount >= 2
+    }
+
+    var swapCount: Int {
+        swapDrafts.count
+    }
+
+    var canAddAnotherSwap: Bool {
+        swapDrafts.count < 2
     }
 
     var isEmpty: Bool {
@@ -247,6 +265,7 @@ struct GameState: Codable {
     var pendingBlindSwap: PendingBlindSwap?
     var turnStartedAt: Date?
     var turnExpiresAt: Date?
+    var playedWordsThisRound: [String]
     var log: [String]
 
     init(
@@ -265,6 +284,7 @@ struct GameState: Codable {
         pendingBlindSwap: PendingBlindSwap? = nil,
         turnStartedAt: Date? = nil,
         turnExpiresAt: Date? = nil,
+        playedWordsThisRound: [String] = [],
         log: [String] = ["Game started"]
     ) {
         self.id = id
@@ -282,6 +302,7 @@ struct GameState: Codable {
         self.pendingBlindSwap = pendingBlindSwap
         self.turnStartedAt = turnStartedAt
         self.turnExpiresAt = turnExpiresAt
+        self.playedWordsThisRound = playedWordsThisRound
         self.log = log
     }
 

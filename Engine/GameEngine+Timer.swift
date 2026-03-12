@@ -5,31 +5,36 @@ extension GameEngine {
 
     func scheduleTurnTimerIfNeeded() {
         timerTask?.cancel()
+        timerNow = Date()
 
         guard var state else { return }
         guard state.phase == .playing else { return }
 
-        state.startTurnTimer()
+        state.startTurnTimer(now: Date())
         self.state = state
+        timerNow = Date()
 
         guard let expiresAt = state.turnExpiresAt else { return }
 
-        let delay = expiresAt.timeIntervalSinceNow
-        guard delay > 0 else {
-            Task { await handleTurnTimeout() }
-            return
-        }
-
         timerTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            guard !Task.isCancelled else { return }
-            await self?.handleTurnTimeout()
+            while !Task.isCancelled {
+                await MainActor.run {
+                    self?.timerNow = Date()
+                }
+
+                if Date() >= expiresAt {
+                    await self?.handleTurnTimeout()
+                    break
+                }
+
+                try? await Task.sleep(nanoseconds: 250_000_000)
+            }
         }
     }
 
     func remainingSeconds() -> Int? {
         guard let expires = state?.turnExpiresAt else { return nil }
-        return max(0, Int(ceil(expires.timeIntervalSinceNow)))
+        return max(0, Int(ceil(expires.timeIntervalSince(timerNow))))
     }
 
     func declineBlindSwap() {
@@ -55,12 +60,12 @@ extension GameEngine {
             return
         }
 
-        let timedOutIndex = Int.random(in: 0..<timedOutHand.count)
-        let eligibleIndex = Int.random(in: 0..<eligibleHand.count)
+        let timedOutCardIndex = Int.random(in: 0..<timedOutHand.count)
+        let eligibleCardIndex = Int.random(in: 0..<eligibleHand.count)
 
-        let temp = timedOutHand[timedOutIndex]
-        timedOutHand[timedOutIndex] = eligibleHand[eligibleIndex]
-        eligibleHand[eligibleIndex] = temp
+        let temp = timedOutHand[timedOutCardIndex]
+        timedOutHand[timedOutCardIndex] = eligibleHand[eligibleCardIndex]
+        eligibleHand[eligibleCardIndex] = temp
 
         state.players[pending.timedOutPlayerIndex].hand = timedOutHand
         state.players[pending.eligiblePlayerIndex].hand = eligibleHand
@@ -80,8 +85,24 @@ extension GameEngine {
 
         let timedOutIndex = state.currentPlayerIndex
 
-        let nextIndex = state.nextPlayerIndex
+        clearPendingTurn()
+        validationMessage = nil
+        roundMessage = nil
+        isBlindSwapPromptVisible = false
 
+        state.log.insert("\(state.players[timedOutIndex].displayName) timed out", at: 0)
+        state.consecutivePasses += 1
+
+        if state.consecutivePasses >= state.players.count {
+            state.pendingBlindSwap = nil
+            endRound(&state, lastPasserIndex: timedOutIndex)
+            publishAndSchedule(state)
+            return
+        }
+
+        advanceToNextPlayer(&state)
+
+        let nextIndex = state.currentPlayerIndex
         if state.config.allowBlindSwapAfterTimeout && nextIndex != timedOutIndex {
             state.pendingBlindSwap = PendingBlindSwap(
                 timedOutPlayerIndex: timedOutIndex,
@@ -91,14 +112,8 @@ extension GameEngine {
             isBlindSwapPromptVisible = (myPlayerIndex == nextIndex)
         } else {
             state.pendingBlindSwap = nil
-            isBlindSwapPromptVisible = false
         }
 
-        clearPendingTurn()
-        validationMessage = nil
-        roundMessage = nil
-
-        finishTurn(&state, actorIndex: timedOutIndex, reason: .pass)
         publishAndSchedule(state)
     }
 }

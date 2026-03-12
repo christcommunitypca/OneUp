@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HandActionAreaView: View {
+    let isMyTurn: Bool
     let isValidating: Bool
     let playButtonTitle: String
     let playIsDiscard: Bool
@@ -22,41 +23,47 @@ struct HandActionAreaView: View {
     let onClear: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                WordBuilderPrimaryButton(
-                    title: isValidating ? "Checking..." : playButtonTitle,
-                    color: playIsDiscard ? Color(hex: "C2410C") : Color(hex: "6E4DD8"),
-                    disabled: !canChoosePlay || isValidating,
-                    action: onPlay
-                )
+        Group {
+            if isMyTurn {
+                VStack(spacing: 8) {
+                    HStack(spacing: 8) {
+                        WordBuilderPrimaryButton(
+                            title: isValidating ? "Checking..." : playButtonTitle,
+                            color: Color(hex: "6E4DD8"),
+                            disabled: !canChoosePlay || isValidating,
+                            action: onPlay
+                        )
 
-                WordBuilderModeButton(
-                    title: "Swap",
-                    isActive: swapIsActive,
-                    disabled: !canChooseSwap,
-                    action: onSwap
-                )
+                        WordBuilderSecondaryButton(
+                            title: "Discard",
+                            disabled: !canChooseDiscard,
+                            action: onDiscard
+                        )
+                    }
 
-                WordBuilderSecondaryButton(
-                    title: "Discard",
-                    disabled: !canChooseDiscard,
-                    action: onDiscard
-                )
-            }
+                    HStack(spacing: 8) {
+                        WordBuilderSecondaryButton(
+                            title: "Pass",
+                            action: onPass
+                        )
 
-            HStack(spacing: 8) {
-                WordBuilderSecondaryButton(
-                    title: "Pass",
-                    action: onPass
-                )
-
-                WordBuilderSecondaryButton(
-                    title: "Clear",
-                    action: onClear
-                )
+                        WordBuilderSecondaryButton(
+                            title: "Clear",
+                            action: onClear
+                        )
+                    }
+                }
+            } else {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(hex: "F9FAFB"))
+                    .overlay(
+                        Text("Waiting on Opponent")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(hex: "6B7280"))
+                    )
             }
         }
+        .frame(minHeight: 96)
     }
 }
 
@@ -76,40 +83,6 @@ private struct WordBuilderPrimaryButton: View {
                 .background(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(disabled ? Color(hex: "D1D5DB") : color)
-                )
-        }
-        .buttonStyle(.plain)
-        .disabled(disabled)
-    }
-}
-
-private struct WordBuilderModeButton: View {
-    let title: String
-    let isActive: Bool
-    let disabled: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(
-                    disabled ? Color(hex: "9CA3AF") :
-                    isActive ? Color(hex: "6E4DD8") :
-                    Color(hex: "111827")
-                )
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isActive ? Color(hex: "F5F3FF") : Color.white)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(
-                            isActive ? Color(hex: "6E4DD8") : Color(hex: "D1D5DB"),
-                            lineWidth: isActive ? 2 : 1
-                        )
                 )
         }
         .buttonStyle(.plain)

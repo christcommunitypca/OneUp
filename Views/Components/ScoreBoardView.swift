@@ -3,11 +3,33 @@ import SwiftUI
 struct ScoreBoardView: View {
     let players: [Player]
     let currentPlayerIndex: Int
+    let winScore: Int
+
+    private var columnCount: Int {
+        min(players.count, max(2, Int(ceil(Double(players.count) / 2.0))))
+    }
+
+    private var gridItems: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 8), count: max(1, columnCount))
+    }
+
+    private var nameFont: CGFloat {
+        columnCount >= 5 ? 11 : columnCount >= 4 ? 12 : 13
+    }
+
+    private var scoreFont: CGFloat {
+        columnCount >= 5 ? 20 : columnCount >= 4 ? 22 : 26
+    }
+
+    private var cardPadding: CGFloat {
+        columnCount >= 5 ? 8 : 10
+    }
+
+    private var minHeight: CGFloat {
+        columnCount >= 5 ? 70 : columnCount >= 4 ? 76 : 88
+    }
 
     var body: some View {
-        let columns = players.count <= 4 ? players.count : 3
-        let gridItems = Array(repeating: GridItem(.flexible(), spacing: 8), count: max(1, columns))
-
         LazyVGrid(columns: gridItems, spacing: 8) {
             ForEach(Array(players.enumerated()), id: \.element.id) { index, player in
                 card(player: player, index: index)
@@ -18,29 +40,34 @@ struct ScoreBoardView: View {
     private func card(player: Player, index: Int) -> some View {
         let current = index == currentPlayerIndex
 
-        return VStack(alignment: .leading, spacing: 6) {
+        return VStack(alignment: .leading, spacing: 4) {
             Text(player.displayName)
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: nameFont, weight: .bold, design: .rounded))
                 .foregroundColor(current ? Theme.violet : Theme.text)
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.65)
 
             Text(player.isComputer ? "Computer" : "Player")
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: max(9, nameFont - 2), weight: .semibold, design: .rounded))
                 .foregroundColor(Theme.gray)
+                .lineLimit(1)
 
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text("\(player.score)")
-                    .font(.system(size: 26, weight: .black))
+                    .font(.system(size: scoreFont, weight: .black, design: .rounded))
                     .foregroundColor(Theme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
-                Text("/ \(Config.winScore)")
-                    .font(.system(size: 11, weight: .bold))
+                Text("/ \(winScore)")
+                    .font(.system(size: max(9, nameFont - 1), weight: .bold, design: .rounded))
                     .foregroundColor(Theme.gray)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 88, alignment: .topLeading)
+        .padding(cardPadding)
+        .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(current ? Theme.violet.opacity(0.10) : Color.white)
