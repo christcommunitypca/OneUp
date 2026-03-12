@@ -51,6 +51,7 @@
 		50A07ADC2F622F4E00062587 /* SettingsProfileCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ADB2F622F4700062587 /* SettingsProfileCardView.swift */; };
 		50A07ADE2F622F5C00062587 /* SettingsAccountCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ADD2F622F5700062587 /* SettingsAccountCardView.swift */; };
 		50A07AE02F622F6900062587 /* SettingsInfoRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07ADF2F622F6400062587 /* SettingsInfoRowView.swift */; };
+		50A07AE42F62F55800062587 /* scowl60_game_words.txt in Resources */ = {isa = PBXBuildFile; fileRef = 50A07AE32F62F55800062587 /* scowl60_game_words.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +116,7 @@
 		50A07ADB2F622F4700062587 /* SettingsProfileCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProfileCardView.swift; sourceTree = "<group>"; };
 		50A07ADD2F622F5700062587 /* SettingsAccountCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAccountCardView.swift; sourceTree = "<group>"; };
 		50A07ADF2F622F6400062587 /* SettingsInfoRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsInfoRowView.swift; sourceTree = "<group>"; };
+		50A07AE32F62F55800062587 /* scowl60_game_words.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = scowl60_game_words.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -219,6 +221,7 @@
 				5080F0C12F60A4E400904DBE /* GameModels.swift */,
 				5080F0C22F60A4E400904DBE /* LetterDeck.swift */,
 				5080F0C32F60A4E400904DBE /* LocalWordList.swift */,
+				50A07AE32F62F55800062587 /* scowl60_game_words.txt */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50A07AE42F62F55800062587 /* scowl60_game_words.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

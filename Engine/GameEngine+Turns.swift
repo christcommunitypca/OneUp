@@ -500,7 +500,7 @@ extension GameEngine {
         isValidating = true
         validationMessage = "Checking \"\(newWordString)\"..."
 
-        let valid = await DictionaryService.isValid(newWordString)
+        let valid = await DictionaryService.isValidForHumanTurn(newWordString)
         isValidating = false
 
         guard valid else {
@@ -650,6 +650,6 @@ extension GameEngine {
         }
 
         let word = livePreviewWord.map(\.letter).joined()
-        livePreviewIsValid = await DictionaryService.isValid(word)
+        livePreviewIsValid = await DictionaryService.isValidForLivePreview(word)
     }
 }

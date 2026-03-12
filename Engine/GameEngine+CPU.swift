@@ -63,7 +63,7 @@ extension GameEngine {
                 let word = candidate.map(\.letter).joined()
                 guard word != currentWordString else { continue }
 
-                if await DictionaryService.isValid(word) {
+                if await DictionaryService.isValidForCPU(word) {
                     clearPendingTurn()
                     pendingTurn.action = .insert
                     pendingTurn.insertDrafts = [
@@ -96,7 +96,7 @@ extension GameEngine {
 
                 for perm in perms {
                     let word = perm.joined()
-                    if await DictionaryService.isValid(word) {
+                    if await DictionaryService.isValidForCPU(word) {
                         var available = combo.map { ($0.offset, $0.element.letter) }
                         var chosenIndices: [Int] = []
 

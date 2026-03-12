@@ -1,51 +1,61 @@
 import Foundation
 
 enum DictionaryService {
-    private static var cache: [String: Bool] = [:]
+    private static var humanCache: [String: Bool] = [:]
+    private static var localCache: [String: Bool] = [:]
 
-    static func isValid(_ word: String) async -> Bool {
-        let lower = word.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    static func isValidForHumanTurn(_ word: String) async -> Bool {
+        guard let lower = normalized(word) else { return false }
 
-        print("DICT CHECK RAW:", word)
-        print("DICT CHECK LOWER:", lower)
+        if let cached = humanCache[lower] { return cached }
 
-        guard lower.count >= 2 else { return false }
-
-        if let cached = cache[lower] {
-            print("DICT CACHE HIT:", lower, cached)
-            return cached
+        if isLocalWord(lower) {
+            humanCache[lower] = true
+            return true
         }
 
-        if let result = await fetchFromAPI(lower) {
-            print("DICT API RESULT:", lower, result)
-            cache[lower] = result
-            return result
-        }
+        let result = await fetchFromAPI(lower) ?? false
+        humanCache[lower] = result
+        return result
+    }
+
+    static func isValidForCPU(_ word: String) async -> Bool {
+        guard let lower = normalized(word) else { return false }
+        return isLocalWord(lower)
+    }
+
+    static func isValidForLivePreview(_ word: String) async -> Bool {
+        guard let lower = normalized(word) else { return false }
+        return isLocalWord(lower)
+    }
+
+    static func isLocalWord(_ word: String) -> Bool {
+        guard let lower = normalized(word) else { return false }
+
+        if let cached = localCache[lower] { return cached }
 
         let result = LocalWordList.contains(lower)
-        print("DICT FALLBACK RESULT:", lower, result)
-        cache[lower] = result
+        localCache[lower] = result
         return result
+    }
+
+    private static func normalized(_ word: String) -> String? {
+        let lower = word
+            .lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard lower.count >= 2 else { return nil }
+        return lower
     }
 
     private static func fetchFromAPI(_ word: String) async -> Bool? {
         guard let url = URL(string: Config.dictionaryBaseURL + word) else { return nil }
 
-        print("DICT URL:", url.absoluteString)
-
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (_, response) = try await URLSession.shared.data(from: url)
             guard let http = response as? HTTPURLResponse else { return nil }
-
-            print("DICT STATUS:", http.statusCode)
-
-            if let body = String(data: data, encoding: .utf8) {
-                print("DICT BODY:", body)
-            }
-
             return http.statusCode == 200
         } catch {
-            print("DICT ERROR:", error.localizedDescription)
             return nil
         }
     }
