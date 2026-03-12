@@ -30,7 +30,9 @@ struct GameView: View {
                     turnStrip
                     HandView()
                 }
-                .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 4)
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
             }
         }
         .navigationBarHidden(true)
@@ -53,8 +55,7 @@ struct GameView: View {
             WinnerBannerView(
                 winner: winner,
                 score: state.players.first(where: { $0.displayName == winner })?.score ?? 0,
-                onNewGame: { showNewGameSheet = true },
-                onSettings: { showSettings = true }
+                onNewGame: { showNewGameSheet = true }
             )
         } else if let pending = state.pendingBlindSwap, pending.isAvailable,
                   engine.isBlindSwapPromptVisible, engine.myPlayerIndex == pending.eligiblePlayerIndex {
@@ -72,7 +73,8 @@ struct GameView: View {
                 Text("Your Turn")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 9).padding(.vertical, 4)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 4)
                     .background(Capsule().fill(Theme.navy))
             }
             if engine.isMyTurn, let s = engine.remainingSeconds() {
@@ -81,6 +83,8 @@ struct GameView: View {
                     .foregroundColor(s <= 5 ? Theme.crimson : Theme.textSecondary)
             }
         }
-        .frame(maxWidth: .infinity).frame(height: 24).padding(.vertical, 2)
+        .frame(maxWidth: .infinity)
+        .frame(height: 24)
+        .padding(.vertical, 2)
     }
 }

@@ -23,6 +23,7 @@ struct Player: Identifiable, Codable, Equatable {
     var hand: [LetterTile]
     var score: Int
     var isComputer: Bool
+    var cpuDifficulty: CPUDifficulty?
     var clerkUserId: String?
     var isCurrentDevice: Bool
 
@@ -32,6 +33,7 @@ struct Player: Identifiable, Codable, Equatable {
         hand: [LetterTile] = [],
         score: Int = 0,
         isComputer: Bool = false,
+        cpuDifficulty: CPUDifficulty? = nil,
         clerkUserId: String? = nil,
         isCurrentDevice: Bool = false
     ) {
@@ -40,6 +42,7 @@ struct Player: Identifiable, Codable, Equatable {
         self.hand = hand
         self.score = score
         self.isComputer = isComputer
+        self.cpuDifficulty = cpuDifficulty
         self.clerkUserId = clerkUserId
         self.isCurrentDevice = isCurrentDevice
     }
@@ -54,6 +57,36 @@ enum GameMode: String, Codable, CaseIterable, Identifiable {
     case hard = "Hard"
 
     var id: String { rawValue }
+}
+
+enum CPUDifficulty: String, Codable, CaseIterable, Identifiable {
+    case novice = "Novice"
+    case adept = "Adept"
+    case expert = "Expert"
+    case master = "Master"
+
+    var id: String { rawValue }
+
+    var shortLabel: String {
+        switch self {
+        case .novice: return "Novice"
+        case .adept: return "Adept"
+        case .expert: return "Expert"
+        case .master: return "Master"
+        }
+    }
+}
+
+struct CPUSetup: Identifiable, Codable, Equatable {
+    let id: UUID
+    var name: String
+    var difficulty: CPUDifficulty
+
+    init(id: UUID = UUID(), name: String, difficulty: CPUDifficulty) {
+        self.id = id
+        self.name = name
+        self.difficulty = difficulty
+    }
 }
 
 enum TurnTimerOption: Int, Codable, CaseIterable, Identifiable {
@@ -81,6 +114,7 @@ enum TurnTimerOption: Int, Codable, CaseIterable, Identifiable {
 
 struct GameConfig: Codable, Equatable {
     var mode: GameMode
+    var defaultCPUDifficulty: CPUDifficulty
     var timer: TurnTimerOption
     var allowBlindSwapAfterTimeout: Bool
     var handSize: Int
@@ -88,12 +122,14 @@ struct GameConfig: Codable, Equatable {
 
     init(
         mode: GameMode = .easy,
+        defaultCPUDifficulty: CPUDifficulty = .adept,
         timer: TurnTimerOption = .off,
         allowBlindSwapAfterTimeout: Bool = true,
         handSize: Int = 7,
         winScore: Int = 20
     ) {
         self.mode = mode
+        self.defaultCPUDifficulty = defaultCPUDifficulty
         self.timer = timer
         self.allowBlindSwapAfterTimeout = allowBlindSwapAfterTimeout
         self.handSize = handSize
@@ -271,12 +307,12 @@ struct GameState: Codable {
     init(
         id: UUID = UUID(),
         players: [Player],
-        drawPile: [LetterTile] = [],
-        discardPile: [LetterTile] = [],
-        currentWord: [LetterTile] = [],
-        currentPlayerIndex: Int = 0,
-        consecutivePasses: Int = 0,
-        phase: GamePhase = .playing,
+        drawPile: [LetterTile],
+        discardPile: [LetterTile],
+        currentWord: [LetterTile],
+        currentPlayerIndex: Int,
+        consecutivePasses: Int,
+        phase: GamePhase,
         winnerName: String? = nil,
         config: GameConfig,
         inviteCode: String? = nil,
@@ -285,7 +321,7 @@ struct GameState: Codable {
         turnStartedAt: Date? = nil,
         turnExpiresAt: Date? = nil,
         playedWordsThisRound: [String] = [],
-        log: [String] = ["Game started"]
+        log: [String] = []
     ) {
         self.id = id
         self.players = players
@@ -337,23 +373,5 @@ struct GameState: Codable {
     mutating func clearTurnTimer() {
         turnStartedAt = nil
         turnExpiresAt = nil
-    }
-}
-
-extension Int {
-    var playerColor: Color {
-        let colors: [Color] = [
-            Color(hex: "8B5CF6"),
-            Color(hex: "F472B6"),
-            Color(hex: "10B981"),
-            Color(hex: "F59E0B"),
-            Color(hex: "F97316"),
-            Color(hex: "06B6D4"),
-            Color(hex: "EF4444"),
-            Color(hex: "84CC16"),
-            Color(hex: "6366F1"),
-            Color(hex: "14B8A6")
-        ]
-        return colors[self % colors.count]
     }
 }

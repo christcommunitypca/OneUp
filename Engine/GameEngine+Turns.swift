@@ -15,6 +15,27 @@ extension GameEngine {
         config: GameConfig,
         humanClerkId: String?
     ) {
+        let cpuPlayers = (0..<cpuCount).map { index in
+            CPUSetup(
+                name: cpuNames[index % cpuNames.count],
+                difficulty: config.defaultCPUDifficulty
+            )
+        }
+
+        newLocalGame(
+            playerNames: playerNames,
+            cpuPlayers: cpuPlayers,
+            config: config,
+            humanClerkId: humanClerkId
+        )
+    }
+
+    func newLocalGame(
+        playerNames: [String],
+        cpuPlayers: [CPUSetup],
+        config: GameConfig,
+        humanClerkId: String?
+    ) {
         var players: [Player] = []
 
         for (index, rawName) in playerNames.enumerated() {
@@ -29,19 +50,21 @@ extension GameEngine {
                     hand: [],
                     score: 0,
                     isComputer: false,
+                    cpuDifficulty: nil,
                     clerkUserId: index == 0 ? humanClerkId : nil,
                     isCurrentDevice: index == 0
                 )
             )
         }
 
-        for i in 0..<cpuCount {
+        for cpu in cpuPlayers {
             players.append(
                 Player(
-                    name: cpuNames[i % cpuNames.count],
+                    name: cpu.name,
                     hand: [],
                     score: 0,
                     isComputer: true,
+                    cpuDifficulty: cpu.difficulty,
                     clerkUserId: nil,
                     isCurrentDevice: false
                 )
@@ -500,7 +523,7 @@ extension GameEngine {
         isValidating = true
         validationMessage = "Checking \"\(newWordString)\"..."
 
-        let valid = await DictionaryService.isValidForHumanTurn(newWordString)
+        let valid = await DictionaryService.isValid(newWordString, mode: .localThenAPI)
         isValidating = false
 
         guard valid else {
@@ -650,6 +673,6 @@ extension GameEngine {
         }
 
         let word = livePreviewWord.map(\.letter).joined()
-        livePreviewIsValid = await DictionaryService.isValidForLivePreview(word)
+        livePreviewIsValid = await DictionaryService.isValid(word, mode: .localOnly)
     }
 }

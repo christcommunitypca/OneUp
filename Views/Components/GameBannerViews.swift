@@ -21,14 +21,14 @@ struct WinnerBannerView: View {
     let winner: String
     let score: Int
     let onNewGame: () -> Void
-    let onSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Winner")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.70))
-                .textCase(.uppercase).kerning(0.8)
+                .textCase(.uppercase)
+                .kerning(0.8)
 
             Text(winner)
                 .font(.system(size: 26, weight: .bold, design: .serif))
@@ -41,7 +41,6 @@ struct WinnerBannerView: View {
 
             HStack(spacing: 8) {
                 InverseBannerButton(title: "New Game", action: onNewGame)
-                InverseBannerButton(title: "Settings", action: onSettings)
             }
             .padding(.top, 2)
         }
