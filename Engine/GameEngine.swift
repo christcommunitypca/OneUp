@@ -22,6 +22,7 @@ final class GameEngine: ObservableObject {
     
     var cpuTask: Task<Void, Never>?
     var timerTask: Task<Void, Never>?
+    var previewValidationTask: Task<Void, Never>?
 
     let cpuNames = [
         "Mabel", "Otis", "Pearl", "Walter", "Hazel",

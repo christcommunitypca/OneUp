@@ -57,13 +57,6 @@ struct GameView: View {
                 score: state.players.first(where: { $0.displayName == winner })?.score ?? 0,
                 onNewGame: { showNewGameSheet = true }
             )
-        } else if let pending = state.pendingBlindSwap, pending.isAvailable,
-                  engine.isBlindSwapPromptVisible, engine.myPlayerIndex == pending.eligiblePlayerIndex {
-            BlindSwapBannerView(
-                timedOutPlayerName: state.players[pending.timedOutPlayerIndex].displayName,
-                onBlindSwap: { engine.acceptBlindSwap() },
-                onSkip: { engine.declineBlindSwap() }
-            )
         }
     }
 

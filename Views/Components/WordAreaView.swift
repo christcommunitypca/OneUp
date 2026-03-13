@@ -16,9 +16,16 @@ struct WordAreaView: View {
                             .font(.system(size: 11, weight: .regular))
                             .foregroundColor(Theme.gray)
                     }
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .background(RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Theme.goldLight))
-                    .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(Theme.gold.opacity(0.25), lineWidth: 1))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(Theme.goldLight)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .stroke(Theme.gold.opacity(0.25), lineWidth: 1)
+                    )
                 }
             }
 
@@ -31,6 +38,10 @@ struct WordAreaView: View {
                 onChooseInsertPosition: { engine.chooseInsertPosition($0) },
                 onChooseSwapIndex: { engine.chooseWordIndexForSwap($0) }
             )
+
+            if let hint = liveHint {
+                WordHintBannerView(text: hint.text, isValid: hint.isValid)
+            }
 
             if let message = engine.roundMessage, !message.isEmpty {
                 WordMessageBannerView(message: message)
@@ -55,59 +66,78 @@ struct WordAreaView: View {
         guard let state = engine.state, !state.currentWord.isEmpty else { return nil }
         return state.wordPoints
     }
-}
 
-struct WordAreaHeaderView: View {
-    let statusTitle: String
-    let statusSubtitle: String
-    let displayedPoints: Int?
+    private var liveHint: (text: String, isValid: Bool)? {
+        guard engine.state?.config.wordHintsEnabled == true else { return nil }
+        guard engine.isMyTurn else { return nil }
+        guard !engine.livePreviewWord.isEmpty else { return nil }
 
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(statusTitle)
-                    .font(.system(size: 15, weight: .bold, design: .serif))
-                    .italic().foregroundColor(Theme.navy)
-                Text(statusSubtitle)
-                    .font(.system(size: 11, weight: .regular)).foregroundColor(Theme.gray)
-            }
-            Spacer()
-            if let points = displayedPoints {
-                VStack(alignment: .trailing, spacing: 0) {
-                    Text("\(points)").font(.system(size: 16, weight: .bold, design: .serif)).foregroundColor(Theme.gold)
-                    Text(points == 1 ? "point" : "points").font(.system(size: 9, weight: .regular)).foregroundColor(Theme.gray)
-                }
-                .padding(.horizontal, 8).padding(.vertical, 6)
-                .background(RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Theme.goldLight))
-            }
+        if let isValid = engine.livePreviewIsValid {
+            return (isValid ? "Valid word" : "Not a valid word", isValid)
         }
+
+        return ("Checking word...", true)
     }
 }
 
-struct WordMessageBannerView: View {
+private struct WordHintBannerView: View {
+    let text: String
+    let isValid: Bool
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Rectangle()
+                .fill(isValid ? Theme.sage : Theme.crimson)
+                .frame(width: 3, height: 16)
+                .clipShape(Capsule())
+
+            Text(text)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(isValid ? Theme.sage : Theme.crimson)
+
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(isValid ? Theme.sageLight : Theme.crimsonLight)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .stroke(
+                    isValid ? Theme.sage.opacity(0.20) : Theme.crimson.opacity(0.20),
+                    lineWidth: 1
+                )
+        )
+    }
+}
+
+private struct WordMessageBannerView: View {
     let message: String
 
     var body: some View {
-        let isError = message.localizedCaseInsensitiveContains("not") ||
-            message.localizedCaseInsensitiveContains("could not") ||
-            message.localizedCaseInsensitiveContains("select") ||
-            message.localizedCaseInsensitiveContains("clear")
-
-        return HStack(spacing: 7) {
+        HStack(spacing: 7) {
             Rectangle()
-                .fill(isError ? Theme.crimson : Theme.sage)
+                .fill(Theme.navy)
                 .frame(width: 3, height: 16)
                 .clipShape(Capsule())
 
             Text(message)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(isError ? Theme.crimson : Theme.sage)
+                .foregroundColor(Theme.textSecondary)
+
             Spacer()
         }
-        .padding(.horizontal, 10).padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 5, style: .continuous)
-            .fill(isError ? Theme.crimsonLight : Theme.sageLight))
-        .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous)
-            .stroke(isError ? Theme.crimson.opacity(0.20) : Theme.sage.opacity(0.20), lineWidth: 1))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(Theme.bgSurface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .stroke(Theme.border, lineWidth: 1)
+        )
     }
 }

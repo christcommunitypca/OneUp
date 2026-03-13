@@ -1,6 +1,6 @@
 import Foundation
 
-enum DictionaryValidationMode {
+enum WordValidationMode {
     case localOnly
     case localThenAPI
 }
@@ -8,7 +8,7 @@ enum DictionaryValidationMode {
 enum DictionaryService {
     private static var cache: [String: Bool] = [:]
 
-    static func isValid(_ word: String, mode: DictionaryValidationMode = .localThenAPI) async -> Bool {
+    static func isValid(_ word: String, validationMode: WordValidationMode = .localThenAPI) async -> Bool {
         let lower = word.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         guard lower.count >= 2 else { return false }
 
@@ -17,7 +17,7 @@ enum DictionaryService {
             return true
         }
 
-        guard mode == .localThenAPI else { return false }
+        guard validationMode == .localThenAPI else { return false }
 
         if let cached = cache[lower] {
             return cached

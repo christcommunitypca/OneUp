@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SetupRulesOptionsView: View {
-    @Binding var mode: GameMode
+    @Binding var wordHintsEnabled: Bool
     @Binding var timer: TurnTimerOption
     @Binding var allowBlindSwapAfterTimeout: Bool
     @Binding var handSize: Int
@@ -9,11 +9,13 @@ struct SetupRulesOptionsView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            optionRow(title: "Dictionary Help", subtitle: "Easy shows live feedback.") {
-                Picker("Mode", selection: $mode) {
-                    ForEach(GameMode.allCases) { Text($0.rawValue).tag($0) }
+            optionRow(title: "Word Hints", subtitle: "On shows live word feedback.") {
+                Picker("Word Hints", selection: $wordHintsEnabled) {
+                    Text("On").tag(true)
+                    Text("Off").tag(false)
                 }
-                .pickerStyle(.segmented).frame(width: 160)
+                .pickerStyle(.segmented)
+                .frame(width: 160)
             }
 
             Divider().background(Theme.border)
@@ -22,7 +24,8 @@ struct SetupRulesOptionsView: View {
                 Picker("Timer", selection: $timer) {
                     ForEach(TurnTimerOption.allCases) { Text($0.displayName).tag($0) }
                 }
-                .pickerStyle(.menu).tint(Theme.navy)
+                .pickerStyle(.menu)
+                .tint(Theme.navy)
             }
 
             Divider().background(Theme.border)
@@ -30,8 +33,12 @@ struct SetupRulesOptionsView: View {
             optionRow(title: "Hand Size", subtitle: "Cards each player holds.") {
                 HStack(spacing: 8) {
                     Text("\(handSize)")
-                        .font(.system(size: 15, weight: .bold, design: .serif)).foregroundColor(Theme.navy).frame(minWidth: 22)
-                    Stepper("", value: $handSize, in: 5...10).labelsHidden()
+                        .font(.system(size: 15, weight: .bold, design: .serif))
+                        .foregroundColor(Theme.navy)
+                        .frame(minWidth: 22)
+
+                    Stepper("", value: $handSize, in: 5...10)
+                        .labelsHidden()
                 }
             }
 
@@ -40,15 +47,44 @@ struct SetupRulesOptionsView: View {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Blind Swap After Timeout")
-                        .font(.system(size: 13, weight: .medium)).foregroundColor(Theme.text)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Theme.text)
+
                     Text(blindSwapSubtitle)
-                        .font(.system(size: 11, weight: .regular)).foregroundColor(Theme.gray)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Theme.gray)
                 }
+
                 Spacer()
-                Toggle("", isOn: $allowBlindSwapAfterTimeout).labelsHidden().tint(Theme.navy)
+
+                Toggle("", isOn: $allowBlindSwapAfterTimeout)
+                    .labelsHidden()
+                    .tint(Theme.navy)
             }
         }
     }
+
+    private func optionRow<Content: View>(
+        title: String,
+        subtitle: String,
+        @ViewBuilder control: () -> Content
+    ) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(Theme.text)
+
+                Text(subtitle)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Theme.gray)
+            }
+
+            Spacer()
+            control()
+        }
+    }
+}
 
     private func optionRow<Content: View>(title: String, subtitle: String, @ViewBuilder control: () -> Content) -> some View {
         HStack(alignment: .center, spacing: 12) {
@@ -60,7 +96,7 @@ struct SetupRulesOptionsView: View {
             control()
         }
     }
-}
+
 
 struct SetupCPUPreviewView: View {
     let names: [String]
