@@ -2,7 +2,6 @@ import SwiftUI
 
 struct GameView: View {
     @EnvironmentObject var engine: GameEngine
-    @EnvironmentObject var authManager: AuthManager
     @State private var showSettings = false
     @State private var showNewGameSheet = false
     @State private var showHelp = false
@@ -37,10 +36,10 @@ struct GameView: View {
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showSettings) {
-            SettingsView().environmentObject(authManager).environmentObject(engine)
+            SettingsView().environmentObject(engine)
         }
         .sheet(isPresented: $showNewGameSheet) {
-            NavigationStack { SetupView().environmentObject(authManager).environmentObject(engine) }
+            NavigationStack { SetupView().environmentObject(engine) }
         }
         .alert("How to Play", isPresented: $showHelp) {
             Button("OK", role: .cancel) { }

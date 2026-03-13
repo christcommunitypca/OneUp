@@ -31,11 +31,6 @@ final class GameEngine: ObservableObject {
 
     var myPlayerIndex: Int? {
         guard let state else { return nil }
-
-        if isMultiplayer, let uid = AuthManager.shared.userId {
-            return state.players.firstIndex(where: { $0.clerkUserId == uid })
-        }
-
         return state.players.firstIndex(where: { $0.isCurrentDevice })
     }
 

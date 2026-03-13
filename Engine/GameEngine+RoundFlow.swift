@@ -11,10 +11,6 @@ extension GameEngine {
     func publishAndSchedule(_ state: GameState) {
         self.state = state
 
-        Task {
-            await syncIfMultiplayer()
-        }
-
         switch state.phase {
         case .playing:
             scheduleTurnTimerIfNeeded()
@@ -50,8 +46,6 @@ extension GameEngine {
 
             self.roundMessage = nil
             self.state = state
-
-            await self.syncIfMultiplayer()
             self.scheduleTurnTimerIfNeeded()
             self.scheduleCPUIfNeeded()
         }

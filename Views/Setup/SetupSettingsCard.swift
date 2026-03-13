@@ -21,6 +21,27 @@ struct SetupSettingsCard: View {
 
                 Spacer()
 
+                NavigationLink {
+                    SupportView()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 11, weight: .semibold))
+
+                        Text("Support")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .foregroundColor(Theme.navy)
+                    .padding(.horizontal, 10)
+                    .frame(height: 28)
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Theme.border, lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+
                 Button(action: onRulesTapped) {
                     HStack(spacing: 4) {
                         Image(systemName: "book")

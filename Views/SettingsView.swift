@@ -1,13 +1,8 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var engine: GameEngine
     @Environment(\.dismiss) private var dismiss
-
-    @State private var editedName: String = ""
-    @State private var isSaving = false
-    @State private var isSigningOut = false
 
     var body: some View {
         NavigationStack {
@@ -16,27 +11,77 @@ struct SettingsView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
-                        SettingsProfileCardView(
-                            editedName: $editedName,
-                            isSaving: isSaving,
-                            canSaveName: canSaveName,
-                            onSave: {
-                                Task { await saveName() }
-                            }
-                        )
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Game")
+                                .font(.system(size: 16, weight: .bold, design: .serif))
+                                .italic()
+                                .foregroundColor(Theme.navy)
 
-                        SettingsAccountCardView(
-                            userId: authManager.userId,
-                            savedName: authManager.playerName,
-                            currentGameLabel: currentGameLabel,
-                            isSigningOut: isSigningOut,
-                            onLeaveGame: {
-                                engine.state = nil
-                                dismiss()
-                            },
-                            onSignOut: {
-                                Task { await signOut() }
+                            HStack {
+                                Text("Current Game")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(Theme.textSecondary)
+
+                                Spacer()
+
+                                Text(currentGameLabel)
+                                    .font(.system(size: 13, weight: .regular))
+                                    .foregroundColor(Theme.gray)
                             }
+                            
+                            NavigationLink {
+                                SupportView()
+                            } label: {
+                                HStack {
+                                    Text("Support One Up")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(Theme.navy)
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(Theme.gray)
+                                }
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color.white)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Theme.border, lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                engine.state = nil
+                                engine.inviteCode = nil
+                                engine.isMultiplayer = false
+                                engine.clearPendingTurn()
+                                dismiss()
+                            } label: {
+                                Text("Leave Current Game")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 44)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Theme.navy)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Theme.border, lineWidth: 1)
                         )
                     }
                     .padding(.horizontal, 16)
@@ -55,15 +100,7 @@ struct SettingsView: View {
                     .font(.system(size: 15, weight: .bold))
                 }
             }
-            .onAppear {
-                editedName = authManager.playerName
-            }
         }
-    }
-
-    private var canSaveName: Bool {
-        !editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        editedName.trimmingCharacters(in: .whitespacesAndNewlines) != authManager.playerName
     }
 
     private var currentGameLabel: String {
@@ -71,32 +108,5 @@ struct SettingsView: View {
             return state.phase == .gameOver ? "Finished game" : "Active game"
         }
         return "No active game"
-    }
-
-    private func saveName() async {
-        let trimmed = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-
-        isSaving = true
-        await authManager.savePlayerName(trimmed)
-        editedName = trimmed
-        isSaving = false
-    }
-
-    private func signOut() async {
-        isSigningOut = true
-
-        engine.state = nil
-        engine.inviteCode = nil
-        engine.isMultiplayer = false
-        engine.clearPendingTurn()
-
-        do {
-            try await authManager.signOut()
-        } catch {
-        }
-
-        isSigningOut = false
-        dismiss()
     }
 }

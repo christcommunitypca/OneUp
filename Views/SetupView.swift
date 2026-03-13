@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct SetupView: View {
-    @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var engine: GameEngine
     @Environment(\.dismiss) private var dismiss
 
@@ -103,12 +102,7 @@ struct SetupView: View {
             winScore: winScore
         )
 
-        engine.newLocalGame(
-            playerNames: ["Me"],
-            cpuPlayers: cpuPlayers,
-            config: config,
-            humanClerkId: authManager.userId
-        )
+        engine.newLocalGame(playerNames: ["Me"], cpuPlayers: cpuPlayers, config: config, humanClerkId: nil)
 
         dismiss()
     }
