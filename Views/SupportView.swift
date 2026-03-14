@@ -107,7 +107,8 @@ struct SupportView: View {
             switch result {
             case .success(let verification):
                 switch verification {
-                case .verified(_):
+                case .verified(let transaction):
+                    await transaction.finish()
                     message = "Thank you for supporting One Up."
                 case .unverified(_, _):
                     message = "Purchase completed, but could not be verified."

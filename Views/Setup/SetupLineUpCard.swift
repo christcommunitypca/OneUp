@@ -2,43 +2,79 @@ import SwiftUI
 
 struct SetupLineupCard: View {
     @Binding var cpuPlayers: [CPUSetup]
+    @Binding var defaultCPUDifficulty: CPUDifficulty
+    
     let canAddCPU: Bool
     let onAddCPU: () -> Void
     let onRemoveCPU: (UUID) -> Void
+    let onReuseLastLineup: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("Lineup")
-                    .font(.system(size: 16, weight: .bold, design: .serif))
-                    .italic()
-                    .foregroundColor(Theme.navy)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Players")
+                        .font(.system(size: 16, weight: .bold, design: .serif))
+                        .italic()
+                        .foregroundColor(Theme.navy)
+
+                    Text("Add bot. Set skill.")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Theme.textSecondary)
+                }
 
                 Spacer()
 
-                Button(action: onAddCPU) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 11, weight: .bold))
+                HStack(spacing: 8) {
+                    Menu {
+                        Picker("New Bots Start At", selection: $defaultCPUDifficulty) {
+                            ForEach(CPUDifficulty.allCases) { difficulty in
+                                Text(difficulty.rawValue).tag(difficulty)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(defaultCPUDifficulty.rawValue)
+                                .font(.system(size: 12, weight: .medium))
 
-                        Text("CPU")
-                            .font(.system(size: 12, weight: .medium))
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 8, weight: .medium))
+                        }
+                        .foregroundColor(Theme.navy)
+                        .padding(.horizontal, 10)
+                        .frame(height: 28)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Theme.border, lineWidth: 1)
+                        )
                     }
-                    .foregroundColor(canAddCPU ? Theme.navy : Theme.gray)
-                    .padding(.horizontal, 10)
-                    .frame(height: 28)
-                    .background(Color.white)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Theme.border, lineWidth: 1)
-                    )
+                    .buttonStyle(.plain)
+
+                    Button(action: onAddCPU) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 11, weight: .bold))
+
+                            Text("Bot")
+                                .font(.system(size: 12, weight: .medium))
+                        }
+                        .foregroundColor(canAddCPU ? Theme.navy : Theme.gray)
+                        .padding(.horizontal, 10)
+                        .frame(height: 28)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Theme.border, lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!canAddCPU)
                 }
-                .buttonStyle(.plain)
-                .disabled(!canAddCPU)
             }
 
             if cpuPlayers.isEmpty {
-                Text("No CPU opponents added")
+                Text("No opponents added. Start a solo game or add bots.")
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Theme.gray)
             } else {
@@ -51,6 +87,13 @@ struct SetupLineupCard: View {
                     }
                 }
             }
+            Button(action: onReuseLastLineup) {
+                Text("Reuse Last Lineup")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Theme.navy)
+            }
+            .buttonStyle(.plain)
+            
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)

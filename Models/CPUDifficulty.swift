@@ -7,7 +7,7 @@
 
 enum CPUDifficulty: String, Codable, CaseIterable, Identifiable {
     case novice = "Novice"
-    case adept = "Adept"
+    case adept = "Skilled"
     case expert = "Expert"
     case master = "Master"
 
@@ -16,7 +16,7 @@ enum CPUDifficulty: String, Codable, CaseIterable, Identifiable {
     var shortLabel: String {
         switch self {
         case .novice: return "Novice"
-        case .adept: return "Adept"
+        case .adept: return "Skilled"
         case .expert: return "Expert"
         case .master: return "Master"
         }

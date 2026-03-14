@@ -14,7 +14,7 @@ struct SetupSettingsCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Settings")
+                Text("Game Setup")
                     .font(.system(size: 16, weight: .bold, design: .serif))
                     .italic()
                     .foregroundColor(Theme.navy)
@@ -63,16 +63,6 @@ struct SetupSettingsCard: View {
             }
 
             toggleRow(title: "Word Hints", isOn: $wordHintsEnabled)
-
-            SetupDividerView()
-
-            pickerRow(title: "Default CPU", selectionText: defaultCPUDifficulty.rawValue) {
-                Picker("Default CPU", selection: $defaultCPUDifficulty) {
-                    ForEach(CPUDifficulty.allCases) { difficulty in
-                        Text(difficulty.rawValue).tag(difficulty)
-                    }
-                }
-            }
 
             SetupDividerView()
 

@@ -18,7 +18,7 @@ struct SetupBottomBar: View {
                     Image(systemName: "play.fill")
                         .font(.system(size: 13, weight: .bold))
 
-                    Text("Start Game")
+                    Text("Start New Game")
                         .font(.system(size: 16, weight: .semibold))
                 }
                 .foregroundColor(.white)

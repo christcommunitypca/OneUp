@@ -16,7 +16,10 @@ struct SetupView: View {
 
     private let maxPlayers = 10
     private let botNames = ["Kate", "Claire", "Henry", "Jack", "Sims", "Miles", "Luke", "Charlotte", "Peggy"]
-
+    
+    private let lastLineupKey = "last_cpu_lineup"
+    private let lastDefaultBotSkillKey = "last_default_bot_skill"
+    
     private var canAddCPU: Bool {
         (1 + cpuPlayers.count) < maxPlayers
     }
@@ -27,18 +30,47 @@ struct SetupView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 14) {
-                    VStack(spacing: 4) {
-                        Text("One Up")
-                            .font(.system(size: 30, weight: .bold, design: .serif))
-                            .italic()
-                            .foregroundColor(Theme.navy)
-                            .frame(maxWidth: .infinity)
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack(alignment: .center, spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(Theme.navyLight)
+                                    .frame(width: 64, height: 64)
 
-                        Text("Add a letter. Steal the lead.")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(Theme.gray)
-                            .frame(maxWidth: .infinity)
+                                Image(systemName: "textformat.abc.dottedunderline")
+                                    .font(.system(size: 24, weight: .semibold))
+                                    .foregroundColor(Theme.navy)
+                            }
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("One Up")
+                                    .font(.system(size: 32, weight: .bold, design: .serif))
+                                    .italic()
+                                    .foregroundColor(Theme.navy)
+
+                                Text("Add a letter. Steal the lead.")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(Theme.textSecondary)
+                            }
+
+                            Spacer()
+                        }
+
+                        Text("Build the next word, outplay the table, and race to the winning score.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(Theme.border, lineWidth: 1)
+                    )
+                    .shadow(color: Theme.cardShadow, radius: 3, y: 1)
                     .padding(.top, 10)
 
                     SetupSettingsCard(
@@ -52,9 +84,11 @@ struct SetupView: View {
 
                     SetupLineupCard(
                         cpuPlayers: $cpuPlayers,
+                        defaultCPUDifficulty: $defaultCPUDifficulty,
                         canAddCPU: canAddCPU,
                         onAddCPU: addCPU,
-                        onRemoveCPU: removeCPU
+                        onRemoveCPU: removeCPU,
+                        onReuseLastLineup: loadLastLineup
                     )
 
                     Color.clear.frame(height: 88)
@@ -93,6 +127,27 @@ struct SetupView: View {
         return botNames[cpuPlayers.count % botNames.count]
     }
 
+    private func saveLastLineup() {
+        if let data = try? JSONEncoder().encode(cpuPlayers) {
+            UserDefaults.standard.set(data, forKey: lastLineupKey)
+        }
+        UserDefaults.standard.set(defaultCPUDifficulty.rawValue, forKey: lastDefaultBotSkillKey)
+    }
+
+    private func loadLastLineup() {
+        if let rawValue = UserDefaults.standard.string(forKey: lastDefaultBotSkillKey),
+           let savedDifficulty = CPUDifficulty(rawValue: rawValue) {
+            defaultCPUDifficulty = savedDifficulty
+        }
+
+        guard let data = UserDefaults.standard.data(forKey: lastLineupKey),
+              let savedLineup = try? JSONDecoder().decode([CPUSetup].self, from: data) else {
+            return
+        }
+
+        cpuPlayers = savedLineup
+    }
+    
     private func startLocalGame() {
         let config = GameConfig(
             wordHintsEnabled: wordHintsEnabled,
@@ -101,7 +156,7 @@ struct SetupView: View {
             handSize: handSize,
             winScore: winScore
         )
-
+        saveLastLineup()
         engine.newLocalGame(playerNames: ["Me"], cpuPlayers: cpuPlayers, config: config, humanClerkId: nil)
 
         dismiss()
