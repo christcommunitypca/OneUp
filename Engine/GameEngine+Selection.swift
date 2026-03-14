@@ -1,15 +1,9 @@
-//
-//  GameEngine+Selection.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/12/26.
-//
-
 import Foundation
 
 @MainActor
 extension GameEngine {
     func toggleHandSelection(at handIndex: Int) {
+        noteCoachRelevantAction()
         guard isMyTurn, let state, let mine = myPlayerIndex else { return }
         guard state.players[mine].hand.indices.contains(handIndex) else { return }
 
@@ -22,6 +16,7 @@ extension GameEngine {
                 pendingTurn.action = .none
                 refreshPendingTurnMirrors()
                 updateLivePreview()
+                scheduleCoachEvaluation(after: 0.9)
                 return
             }
 
@@ -32,6 +27,7 @@ extension GameEngine {
             pendingTurn.activeHandIndex = nil
             refreshPendingTurnMirrors()
             updateLivePreview()
+            scheduleCoachEvaluation(after: 0.7)
             return
         }
 
@@ -40,6 +36,7 @@ extension GameEngine {
             pendingTurn.action = .none
             refreshPendingTurnMirrors()
             updateLivePreview()
+            scheduleCoachEvaluation(after: 0.8)
             return
         }
 
@@ -48,6 +45,7 @@ extension GameEngine {
             pendingTurn.action = .none
             refreshPendingTurnMirrors()
             updateLivePreview()
+            scheduleCoachEvaluation(after: 0.8)
             return
         }
 
@@ -59,6 +57,7 @@ extension GameEngine {
             pendingTurn.action = .none
             refreshPendingTurnMirrors()
             updateLivePreview()
+            scheduleCoachEvaluation(after: 0.8)
             return
         }
 
@@ -74,9 +73,11 @@ extension GameEngine {
         pendingTurn.action = .none
         refreshPendingTurnMirrors()
         updateLivePreview()
+        scheduleCoachEvaluation(after: 0.8)
     }
 
     func chooseInsertPosition(_ position: Int) {
+        noteCoachRelevantAction()
         guard isMyTurn, let state else { return }
         guard pendingTurn.hasSingleSelection, let handIndex = pendingTurn.selectedHandIndices.first else { return }
 
@@ -92,6 +93,7 @@ extension GameEngine {
             pendingTurn.action = .none
             refreshPendingTurnMirrors()
             updateLivePreview()
+            scheduleCoachEvaluation(after: 0.6)
             return
         }
 
@@ -111,6 +113,7 @@ extension GameEngine {
         pendingTurn.action = .none
         refreshPendingTurnMirrors()
         updateLivePreview()
+        scheduleCoachEvaluation(after: 0.6)
     }
 
     func chooseSwapMode() {
@@ -120,6 +123,7 @@ extension GameEngine {
     }
 
     func chooseWordIndexForSwap(_ wordIndex: Int) {
+        noteCoachRelevantAction()
         guard isMyTurn else { return }
         guard let state else { return }
         guard !state.currentWord.isEmpty else { return }
@@ -151,11 +155,13 @@ extension GameEngine {
 
         refreshPendingTurnMirrors()
         updateLivePreview()
+        scheduleCoachEvaluation(after: 0.6)
     }
 
     func clearPendingTurn() {
         pendingTurn = .init()
         livePreviewWord = []
         livePreviewIsValid = nil
+        scheduleCoachEvaluation(after: 1.0)
     }
 }

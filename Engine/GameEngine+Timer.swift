@@ -13,6 +13,12 @@ extension GameEngine {
         self.state = state
         timerNow = Date()
 
+        if isMyTurn {
+            scheduleCoachEvaluation(after: 1.6)
+        } else {
+            clearCoachTip()
+        }
+
         guard let expiresAt = state.turnExpiresAt else { return }
 
         timerTask = Task { [weak self] in
@@ -47,6 +53,7 @@ extension GameEngine {
         roundMessage = nil
         isBlindSwapPromptVisible = false
         state.pendingBlindSwap = nil
+        clearCoachTip()
 
         state.log.insert("\(state.players[timedOutIndex].displayName) timed out", at: 0)
         state.consecutivePasses += 1

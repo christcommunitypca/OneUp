@@ -3,11 +3,10 @@ import SwiftUI
 struct SetupLineupCard: View {
     @Binding var cpuPlayers: [CPUSetup]
     @Binding var defaultCPUDifficulty: CPUDifficulty
-    
+
     let canAddCPU: Bool
     let onAddCPU: () -> Void
     let onRemoveCPU: (UUID) -> Void
-    let onReuseLastLineup: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -36,6 +35,8 @@ struct SetupLineupCard: View {
                         HStack(spacing: 4) {
                             Text(defaultCPUDifficulty.rawValue)
                                 .font(.system(size: 12, weight: .medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
 
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.system(size: 8, weight: .medium))
@@ -87,13 +88,6 @@ struct SetupLineupCard: View {
                     }
                 }
             }
-            Button(action: onReuseLastLineup) {
-                Text("Reuse Last Lineup")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Theme.navy)
-            }
-            .buttonStyle(.plain)
-            
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)

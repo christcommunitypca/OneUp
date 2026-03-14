@@ -5,19 +5,68 @@ struct ScoreBoardView: View {
     let currentPlayerIndex: Int
     let winScore: Int
 
+    private var totalPlayers: Int { players.count }
+
+    // Use up to 3 rows when the table gets crowded.
+    private var targetRows: Int {
+        if totalPlayers > 4 { return 3 }
+        return 2
+    }
+
     private var columnCount: Int {
-        min(players.count, max(2, Int(ceil(Double(players.count) / 2.0))))
+        max(1, Int(ceil(Double(totalPlayers) / Double(targetRows))))
     }
+
     private var gridItems: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: 6), count: max(1, columnCount))
+        Array(
+            repeating: GridItem(.flexible(), spacing: interItemSpacing),
+            count: columnCount
+        )
     }
-    private var nameFont: CGFloat { columnCount >= 5 ? 11 : columnCount >= 4 ? 12 : 13 }
-    private var scoreFont: CGFloat { columnCount >= 5 ? 18 : columnCount >= 4 ? 20 : 24 }
-    private var cardPadding: CGFloat { columnCount >= 5 ? 8 : 10 }
-    private var minHeight: CGFloat { columnCount >= 5 ? 66 : columnCount >= 4 ? 72 : 84 }
+
+    private var interItemSpacing: CGFloat {
+        compactMode ? 4 : 6
+    }
+
+    private var compactMode: Bool {
+        totalPlayers >= 8
+    }
+
+    private var ultraCompactMode: Bool {
+        totalPlayers >= 10
+    }
+
+    private var nameFont: CGFloat {
+        if ultraCompactMode { return 10 }
+        if compactMode { return 10.5 }
+        if columnCount >= 4 { return 11.5 }
+        return 13
+    }
+
+    private var secondaryFont: CGFloat {
+        max(8.5, nameFont - 2)
+    }
+
+    private var scoreFont: CGFloat {
+        if ultraCompactMode { return 15 }
+        if compactMode { return 16 }
+        if columnCount >= 4 { return 18 }
+        return 22
+    }
+
+    private var cardPadding: CGFloat {
+        compactMode ? 6 : 8
+    }
+
+    private var cardMinHeight: CGFloat {
+        if ultraCompactMode { return 46 }
+        if compactMode { return 50 }
+        if columnCount >= 4 { return 58 }
+        return 72
+    }
 
     var body: some View {
-        LazyVGrid(columns: gridItems, spacing: 6) {
+        LazyVGrid(columns: gridItems, spacing: interItemSpacing) {
             ForEach(Array(players.enumerated()), id: \.element.id) { index, player in
                 card(player: player, index: index)
             }
@@ -25,36 +74,66 @@ struct ScoreBoardView: View {
     }
 
     private func card(player: Player, index: Int) -> some View {
-        let current = index == currentPlayerIndex
-        return VStack(alignment: .leading, spacing: 3) {
-            Text(player.displayName)
-                .font(.system(size: nameFont, weight: .semibold))
-                .foregroundColor(current ? Theme.navy : Theme.text)
-                .lineLimit(1).minimumScaleFactor(0.65)
+        let isCurrent = index == currentPlayerIndex
 
-            Text(player.isComputer ? "Computer" : "Player")
-                .font(.system(size: max(9, nameFont - 2), weight: .regular))
-                .foregroundColor(Theme.gray).lineLimit(1)
+        return VStack(alignment: .leading, spacing: compactMode ? 1 : 3) {
+            Text(primaryLabel(for: player))
+                .font(.system(size: nameFont, weight: .semibold))
+                .foregroundColor(isCurrent ? Theme.navy : Theme.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.62)
+
+            if !ultraCompactMode {
+                Text(secondaryLabel(for: player))
+                    .font(.system(size: secondaryFont, weight: .regular))
+                    .foregroundColor(Theme.gray)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
 
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text("\(player.score)")
                     .font(.system(size: scoreFont, weight: .bold, design: .serif))
-                    .foregroundColor(current ? Theme.navy : Theme.text)
-                    .lineLimit(1).minimumScaleFactor(0.7)
-                Text("/ \(winScore)")
-                    .font(.system(size: max(9, nameFont - 1), weight: .regular))
-                    .foregroundColor(Theme.gray).lineLimit(1)
+                    .foregroundColor(isCurrent ? Theme.navy : Theme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                if !compactMode {
+                    Text("/ \(winScore)")
+                        .font(.system(size: max(9, nameFont - 1), weight: .regular))
+                        .foregroundColor(Theme.gray)
+                        .lineLimit(1)
+                }
             }
         }
         .padding(cardPadding)
-        .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: cardMinHeight, alignment: .topLeading)
         .background(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(current ? Theme.navyLight : Color.white)
+            RoundedRectangle(cornerRadius: compactMode ? 5 : 6, style: .continuous)
+                .fill(isCurrent ? Theme.navyLight : Color.white)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .stroke(current ? Theme.navy.opacity(0.40) : Theme.border, lineWidth: current ? 1.5 : 1)
+            RoundedRectangle(cornerRadius: compactMode ? 5 : 6, style: .continuous)
+                .stroke(
+                    isCurrent ? Theme.navy.opacity(0.40) : Theme.border,
+                    lineWidth: isCurrent ? 1.5 : 1
+                )
         )
+    }
+
+    private func primaryLabel(for player: Player) -> String {
+        if player.isComputer {
+            return player.displayName
+        } else {
+            return "You"
+        }
+    }
+
+    private func secondaryLabel(for player: Player) -> String {
+        if player.isComputer {
+            return player.cpuDifficulty?.shortLabel ?? "Bot"
+        } else {
+            return "You"
+        }
     }
 }

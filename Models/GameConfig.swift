@@ -9,7 +9,7 @@ struct GameConfig: Codable, Equatable {
 
     init(
         wordHintsEnabled: Bool = true,
-        defaultCPUDifficulty: CPUDifficulty = .adept,
+        defaultCPUDifficulty: CPUDifficulty = .pro,
         timer: TurnTimerOption = .off,
         handSize: Int = 7,
         winScore: Int = 20

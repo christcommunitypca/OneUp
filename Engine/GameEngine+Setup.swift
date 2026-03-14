@@ -103,7 +103,9 @@ extension GameEngine {
         clearPendingTurn()
         validationMessage = nil
         roundMessage = nil
+        coachTip = nil
         scheduleTurnTimerIfNeeded()
         scheduleCPUIfNeeded()
+        refreshCoachTip()
     }
 }

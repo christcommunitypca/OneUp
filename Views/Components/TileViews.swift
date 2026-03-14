@@ -21,7 +21,7 @@ struct HandTileView: View {
                 )
 
                 Text(tile.letter)
-                    .font(.system(size: 22, weight: .bold, design: .serif))
+                    .font(.system(size: 24, weight: .bold, design: .serif))
                     .foregroundColor(letterColor)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
 
@@ -56,8 +56,8 @@ struct HandTileView: View {
     }
 
     private var borderWidth: CGFloat {
-        if isDiscardSelected || isSwapSelected || isStaged { return 1.5 }
-        return 1
+        if isDiscardSelected || isSwapSelected || isStaged { return 1.7 }
+        return 1.15
     }
 
     private var letterColor: Color {
@@ -83,12 +83,12 @@ struct HandTileView: View {
 
     private var shadowRadius: CGFloat {
         if isSwapSelected || isStaged { return 6 }
-        return 2
+        return 3
     }
 
     private var shadowY: CGFloat {
         if isSwapSelected || isStaged { return 3 }
-        return 1
+        return 2
     }
 }
 
@@ -129,7 +129,7 @@ struct WordTileView: View {
                 )
 
                 Text(tile.letter)
-                    .font(.system(size: min(20, max(13, width * 0.50)), weight: .bold, design: .serif))
+                    .font(.system(size: min(22, max(14, width * 0.54)), weight: .bold, design: .serif))
                     .minimumScaleFactor(0.45)
                     .lineLimit(1)
                     .foregroundColor(letterColor)
@@ -157,8 +157,8 @@ struct WordTileView: View {
     }
 
     private var borderWidth: CGFloat {
-        if isSwapTarget || isStaged { return 1.5 }
-        return 1
+        if isSwapTarget || isStaged { return 1.7 }
+        return 1.15
     }
 
     private var letterColor: Color {
@@ -173,8 +173,8 @@ struct WordTileView: View {
         return Theme.cardShadow
     }
 
-    private var shadowRadius: CGFloat { isSwapTarget || isStaged ? 5 : 2 }
-    private var shadowY: CGFloat { isSwapTarget || isStaged ? 2 : 1 }
+    private var shadowRadius: CGFloat { isSwapTarget || isStaged ? 5 : 3 }
+    private var shadowY: CGFloat { isSwapTarget || isStaged ? 2 : 2 }
 }
 
 struct SlotGapView: View {
@@ -239,6 +239,11 @@ private struct TileCardBackground: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 5, style: .continuous)
             .fill(fillColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .stroke(Color.white.opacity(0.45), lineWidth: 0.8)
+                    .padding(0.6)
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .stroke(borderColor, lineWidth: borderWidth)

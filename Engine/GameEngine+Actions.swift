@@ -1,10 +1,3 @@
-//
-//  GameEngine+Actions.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/12/26.
-//
-
 import Foundation
 
 @MainActor
@@ -12,7 +5,7 @@ extension GameEngine {
     func discardSelectedLetters() {
         guard var state else { return }
         guard let actorIndex = activeActorIndex(for: state) else { return }
-
+        noteCoachRelevantAction()
         let drafted = Set(pendingTurn.insertDrafts.map(\.handIndex) + pendingTurn.swapDrafts.map(\.handIndex))
         let selected = Set(pendingTurn.selectedHandIndices)
 
@@ -44,6 +37,7 @@ extension GameEngine {
 
         validationMessage = nil
         roundMessage = nil
+        clearCoachTip()
 
         finishTurn(&state, actorIndex: actorIndex, reason: .discard)
         publishAndSchedule(state)
@@ -76,6 +70,7 @@ extension GameEngine {
             return
         }
 
+        clearCoachTip()
         isValidating = true
         validationMessage = "Checking \"\(newWordString)\"..."
 
@@ -84,6 +79,7 @@ extension GameEngine {
 
         guard valid else {
             validationMessage = "\"\(newWordString)\" is not a valid word"
+            scheduleCoachEvaluation(after: 1.2)
             return
         }
 
@@ -134,6 +130,7 @@ extension GameEngine {
 
         validationMessage = nil
         roundMessage = nil
+        clearCoachTip()
         clearPendingTurn()
         state.log.insert("\(state.players[actorIndex].displayName) passed", at: 0)
 

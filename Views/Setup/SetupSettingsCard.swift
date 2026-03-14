@@ -9,8 +9,10 @@ struct SetupSettingsCard: View {
 
     let onRulesTapped: () -> Void
 
-    private let settingsControlWidth: CGFloat = 120
-
+    private let numericControlWidth: CGFloat = 96
+    private let settingsControlWidth: CGFloat = 96
+    private let timerControlWidth: CGFloat = 58
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -118,16 +120,20 @@ struct SetupSettingsCard: View {
             Menu {
                 content()
             } label: {
-                HStack(spacing: 5) {
+                HStack(spacing: 4) {
+                    Spacer(minLength: 0)
+
                     Text(selectionText)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(Theme.navy)
+                        .multilineTextAlignment(.trailing)
 
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundColor(Theme.navy)
                 }
-                .frame(width: settingsControlWidth, height: 28)
+                .padding(.horizontal, 8)
+                .frame(width: timerControlWidth, height: 28, alignment: .trailing)
                 .background(Color.white)
                 .overlay(
                     RoundedRectangle(cornerRadius: 5)
@@ -152,7 +158,7 @@ struct SetupSettingsCard: View {
                     .labelsHidden()
                     .tint(Theme.navy)
             }
-            .frame(width: settingsControlWidth, alignment: .trailing)
+            .frame(width: numericControlWidth, alignment: .trailing)
         }
     }
 
@@ -169,24 +175,20 @@ struct SetupSettingsCard: View {
 
             Spacer()
 
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Button(action: onMinus) {
                     Image(systemName: "minus")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(Theme.navy)
                         .frame(width: 28, height: 28)
                         .background(Circle().fill(Theme.navyLight))
-                        .overlay(
-                            Circle()
-                                .stroke(Theme.navy.opacity(0.18), lineWidth: 1)
-                        )
                 }
                 .buttonStyle(.plain)
 
                 Text("\(value)")
-                    .font(.system(size: 16, weight: .bold, design: .serif))
+                    .font(.system(size: 15, weight: .bold, design: .serif))
                     .foregroundColor(Theme.navy)
-                    .frame(minWidth: 28)
+                    .frame(minWidth: 24)
 
                 Button(action: onPlus) {
                     Image(systemName: "plus")
@@ -194,14 +196,10 @@ struct SetupSettingsCard: View {
                         .foregroundColor(Theme.navy)
                         .frame(width: 28, height: 28)
                         .background(Circle().fill(Theme.navyLight))
-                        .overlay(
-                            Circle()
-                                .stroke(Theme.navy.opacity(0.18), lineWidth: 1)
-                        )
                 }
                 .buttonStyle(.plain)
             }
-            .frame(width: settingsControlWidth, alignment: .trailing)
+            .frame(width: numericControlWidth, alignment: .trailing)
         }
     }
 }

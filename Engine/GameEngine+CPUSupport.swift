@@ -1,10 +1,3 @@
-//
-//  GameEngine+CPUSupport.swift
-//  WordBuilder
-//
-//  Created by Rick Hutchinson on 3/12/26.
-//
-
 import Foundation
 
 @MainActor
@@ -35,9 +28,9 @@ extension GameEngine {
 
     func cpuProfile(for difficulty: CPUDifficulty) -> CPUProfile {
         switch difficulty {
-        case .novice:
+        case .rookie:
             return CPUProfile(
-                openingMaxLength: 4,
+                openingMaxLength: 3,
                 allowSingleInsert: true,
                 allowDoubleInsert: false,
                 allowSingleSwap: false,
@@ -46,7 +39,8 @@ extension GameEngine {
                 selectionStyle: .weakestLegal,
                 handQualityWeight: 0
             )
-        case .adept:
+
+        case .pro:
             return CPUProfile(
                 openingMaxLength: 5,
                 allowSingleInsert: true,
@@ -57,7 +51,8 @@ extension GameEngine {
                 selectionStyle: .strongestLegal,
                 handQualityWeight: 1
             )
-        case .expert:
+
+        case .elite:
             return CPUProfile(
                 openingMaxLength: 6,
                 allowSingleInsert: true,
@@ -65,9 +60,22 @@ extension GameEngine {
                 allowSingleSwap: true,
                 usesDiscardWhenStuck: true,
                 discardCount: 1,
-                selectionStyle: .strongestStrategic,
+                selectionStyle: .strongestLegal,
                 handQualityWeight: 2
             )
+
+        case .expert:
+            return CPUProfile(
+                openingMaxLength: 7,
+                allowSingleInsert: true,
+                allowDoubleInsert: false,
+                allowSingleSwap: true,
+                usesDiscardWhenStuck: true,
+                discardCount: 1,
+                selectionStyle: .strongestStrategic,
+                handQualityWeight: 3
+            )
+
         case .master:
             return CPUProfile(
                 openingMaxLength: 7,
@@ -97,7 +105,9 @@ extension GameEngine {
 
         switch style {
         case .weakestLegal:
-            return sorted.first
+            let weakPool = Array(sorted.prefix(min(3, sorted.count)))
+            return weakPool.randomElement() ?? sorted.first
+
         case .strongestLegal, .strongestStrategic:
             return sorted.last
         }
@@ -143,7 +153,7 @@ extension GameEngine {
         }
 
         for swap in swaps {
-            guard currentWord.indices.contains(swap.wordIndex) else { continue }
+            guard currentWord.indices.contains(swap.wordIndex), hand.indices.contains(swap.handIndex) else { continue }
             if let existingIndex = leftovers.firstIndex(of: hand[swap.handIndex].letter) {
                 leftovers.remove(at: existingIndex)
             }

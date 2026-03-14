@@ -23,11 +23,14 @@ struct SupportView: View {
                 Text("If you enjoy the game, you can leave a tip to support future updates.")
                     .font(.system(size: 15, weight: .regular))
                     .foregroundColor(Theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if isLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 20)
+                } else if sortedProducts.isEmpty {
+                    emptyStateCard
                 } else {
                     ForEach(sortedProducts, id: \.id) { product in
                         Button {
@@ -55,6 +58,7 @@ struct SupportView: View {
                                     .foregroundColor(.blue)
                             }
                             .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
                                     .fill(Color.white)
@@ -75,6 +79,7 @@ struct SupportView: View {
                         .padding(.top, 8)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
         }
         .background(Theme.bgPage.ignoresSafeArea())
@@ -91,9 +96,35 @@ struct SupportView: View {
         }
     }
 
+    private var emptyStateCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Support options are not available yet.")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(Theme.navy)
+
+            Text("If this is TestFlight, your tip items may still need a moment to appear. You can come back here later and try again.")
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Theme.border, lineWidth: 1)
+        )
+    }
+
     private func loadProducts() async {
         do {
             products = try await Product.products(for: productIDs)
+            if products.isEmpty {
+                message = "No support options are showing yet."
+            }
         } catch {
             message = "Could not load support options."
         }

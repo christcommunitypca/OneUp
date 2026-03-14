@@ -11,6 +11,10 @@ extension GameEngine {
     func publishAndSchedule(_ state: GameState) {
         self.state = state
 
+        if !isMyTurn || state.phase != .playing {
+            clearCoachTip()
+        }
+
         switch state.phase {
         case .playing:
             scheduleTurnTimerIfNeeded()
@@ -21,6 +25,7 @@ extension GameEngine {
 
         case .gameOver:
             timerTask?.cancel()
+            clearCoachTip()
 
         default:
             break
@@ -31,7 +36,7 @@ extension GameEngine {
         roundTransitionTask?.cancel()
 
         roundTransitionTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            try? await Task.sleep(nanoseconds: 2_400_000_000)
             guard let self else { return }
             guard var state = self.state else { return }
             guard state.phase == .roundOver else { return }
@@ -56,6 +61,7 @@ extension GameEngine {
         actorIndex: Int,
         reason: TurnEndReason
     ) {
+        recordCoachTurnCompletedIfNeeded(actorIndex: actorIndex)
         clearPendingTurn()
         state.pendingBlindSwap = nil
 
@@ -120,6 +126,7 @@ extension GameEngine {
             state.clearTurnTimer()
             state.pendingBlindSwap = nil
             roundMessage = "Game over. \(scorerName) wins."
+            recordCoachGameCompleted()
             return
         }
 

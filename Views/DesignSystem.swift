@@ -12,18 +12,19 @@ enum Theme {
     )
     static let bgPage      = Color(hex: "F5F1EB")   // warm parchment
     static let bgCard      = Color(hex: "FFFFFF")
-    static let bgSurface   = Color(hex: "F0EDE6")   // slightly warmer than page
+    static let bgSurface   = Color(hex: "E6DDD0")   // slightly darker so tiles pop
     static let bgInput     = Color(hex: "FAFAF7")
 
-    static let navy        = Color(hex: "1B3A5C")   // deep navy — primary
-    static let navyLight   = Color(hex: "EBF0F6")
-    static let gold        = Color(hex: "92600A")   // warm amber — scoring, accents
-    static let goldLight   = Color(hex: "FDF3E0")
-    static let sage        = Color(hex: "2D6A4F")   // muted sage — valid/success
-    static let sageLight   = Color(hex: "E8F4ED")
-    static let crimson     = Color(hex: "9B2335")   // deep crimson — error/discard
+    static let navy        = Color(hex: "173754")   // deep navy — primary
+    static let navyLight   = Color(hex: "ECF2FA")
+   // static let gold        = Color(hex: "8C5B08")   // warm amber — scoring, accents
+    static let gold        = Color(hex: "6B4206")   // warm amber — scoring, accents
+    static let goldLight   = Color(hex: "FCF2DE")
+    static let sage        = Color(hex: "255F47")   // muted sage — valid/success
+    static let sageLight   = Color(hex: "ECF6F0")
+    static let crimson     = Color(hex: "8F2232")   // deep crimson — error/discard
     static let crimsonLight = Color(hex: "FAECEE")
-    static let slate       = Color(hex: "4A5568")   // mid-tone for secondary text
+    static let slate       = Color(hex: "425064")   // mid-tone for secondary text
 
     // Aliases used by components
     static let violet      = navy
@@ -36,14 +37,14 @@ enum Theme {
     static let coral       = crimson
     static let coralLight  = crimsonLight
 
-    static let text        = Color(hex: "1A1A1A")
-    static let textSecondary = Color(hex: "4A5568")
-    static let gray        = Color(hex: "6B7280")
-    static let lightGray   = Color(hex: "F0EDE6")
-    static let border      = Color(hex: "D6CEBB")   // warm tan border
-    static let borderBold  = Color(hex: "B8AD9E")
+    static let text        = Color(hex: "111111")
+    static let textSecondary = Color(hex: "354052")
+    static let gray        = Color(hex: "566171")
+    static let lightGray   = Color(hex: "ECE7DD")
+    static let border      = Color(hex: "BDAF9A")   // warm tan border
+    static let borderBold  = Color(hex: "8F7E69")
     static let white       = Color.white
-    static let cardShadow  = Color(hex: "3D2B1F").opacity(0.07)
+    static let cardShadow  = Color(hex: "3D2B1F").opacity(0.10)
     static let panelRadius: CGFloat = 8
     static let tileRadius:  CGFloat = 6
 }
@@ -148,3 +149,4 @@ struct SmallButton: View {
         .disabled(disabled)
     }
 }
+
